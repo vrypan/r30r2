@@ -1,9 +1,8 @@
-# Turmite RNG Makefile
+# Rule 30 RNG Makefile
 
 # Binary names
-MAIN_BIN = turmite-rng
 RULE30_BIN = rule30-rng
-COMPARE_BIN = turmite-compare
+COMPARE_BIN = rule30-compare
 
 # Go parameters
 GOCMD = go
@@ -18,23 +17,14 @@ LDFLAGS = -s -w
 BUILD_FLAGS = -ldflags "$(LDFLAGS)"
 
 # Source files
-MAIN_SOURCES = main.go turmite.go rng.go
 RULE30_SOURCES = rule30-main.go rule30-cli.go rule30.go
-COMPARE_SOURCES = compare.go turmite.go rng.go rule30.go
+COMPARE_SOURCES = compare.go rule30.go
 TEST_SOURCES = benchmark_test.go
 
-.PHONY: all build rule30 compare test bench clean fmt help install compare-run
+.PHONY: all rule30 compare test bench clean fmt help install compare-run
 
 # Default target
-all: build rule30 compare
-
-# Build the main CLI tool
-build: $(MAIN_BIN)
-
-$(MAIN_BIN): $(MAIN_SOURCES)
-	@echo "Building $(MAIN_BIN)..."
-	$(GOBUILD) $(BUILD_FLAGS) -o $(MAIN_BIN) $(MAIN_SOURCES)
-	@echo "✓ Built $(MAIN_BIN)"
+all: rule30 compare
 
 # Build the Rule 30 CLI tool
 rule30: $(RULE30_BIN)
@@ -83,7 +73,6 @@ fmt:
 clean:
 	@echo "Cleaning..."
 	$(GOCLEAN)
-	rm -f $(MAIN_BIN)
 	rm -f $(RULE30_BIN)
 	rm -f $(COMPARE_BIN)
 	rm -f *.prof
@@ -93,9 +82,8 @@ clean:
 	@echo "✓ Cleaned"
 
 # Install binaries to GOPATH/bin
-install: build rule30 compare
+install: rule30 compare
 	@echo "Installing binaries..."
-	cp $(MAIN_BIN) $(GOPATH)/bin/
 	cp $(RULE30_BIN) $(GOPATH)/bin/
 	cp $(COMPARE_BIN) $(GOPATH)/bin/
 	@echo "✓ Installed to $(GOPATH)/bin/"
@@ -108,9 +96,9 @@ deps:
 	@echo "✓ Dependencies updated"
 
 # Generate random test data
-testdata: $(MAIN_BIN)
+testdata: $(RULE30_BIN)
 	@echo "Generating test data (1MB)..."
-	./$(MAIN_BIN) --bytes=1048576 > testdata.bin
+	./$(RULE30_BIN) --bytes=1048576 > testdata.bin
 	@echo "✓ Generated testdata.bin (1MB)"
 
 # Test randomness with ent (if available)
@@ -123,23 +111,22 @@ test-entropy: testdata
 	fi
 
 # Quick smoke test
-smoke: build
+smoke: rule30
 	@echo "Running smoke test..."
-	@./$(MAIN_BIN) --seed=12345 --bytes=1024 > /dev/null
+	@./$(RULE30_BIN) --seed=12345 --bytes=1024 > /dev/null
 	@echo "✓ Smoke test passed"
 
 # Show help
 help:
-	@echo "Turmite RNG Makefile"
+	@echo "Rule 30 RNG Makefile"
 	@echo ""
 	@echo "Usage:"
 	@echo "  make [target]"
 	@echo ""
 	@echo "Targets:"
 	@echo "  all            Build all binaries (default)"
-	@echo "  build          Build turmite-rng CLI tool"
 	@echo "  rule30         Build rule30-rng CLI tool"
-	@echo "  compare        Build turmite-compare tool"
+	@echo "  compare        Build rule30-compare tool"
 	@echo "  compare-run    Run performance comparison"
 	@echo "  test           Run Go tests"
 	@echo "  bench          Run benchmarks"
@@ -154,7 +141,7 @@ help:
 	@echo "  help           Show this help message"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make build"
+	@echo "  make rule30"
 	@echo "  make compare-run"
 	@echo "  make bench"
-	@echo "  make clean build"
+	@echo "  make clean rule30"

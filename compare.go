@@ -154,7 +154,6 @@ func main() {
 
 	// Store results by RNG type and size
 	results := make(map[string]map[int]BenchResult)
-	results["TurmiteRNG"] = make(map[int]BenchResult)
 	results["Rule30RNG"] = make(map[int]BenchResult)
 	results["math/rand"] = make(map[int]BenchResult)
 	results["crypto/rand"] = make(map[int]BenchResult)
@@ -166,15 +165,9 @@ func main() {
 
 		fmt.Printf("Testing with %s buffers (%d iterations)...\n", sizeStr, iters)
 
-		// TurmiteRNG
-		turmite := New(12345)
-		result := runBenchmark("TurmiteRNG", turmite, size, iters)
-		results["TurmiteRNG"][size] = result
-		fmt.Printf("  ✓ TurmiteRNG:  %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
-
 		// Rule30RNG
 		rule30 := NewRule30(12345)
-		result = runBenchmark("Rule30RNG", rule30, size, iters)
+		result := runBenchmark("Rule30RNG", rule30, size, iters)
 		results["Rule30RNG"][size] = result
 		fmt.Printf("  ✓ Rule30RNG:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
 
@@ -208,7 +201,7 @@ func main() {
 	fmt.Println("───────────────┼──────────┼──────────┼──────────┼──────────┼──────────")
 
 	// Table rows
-	rngNames := []string{"TurmiteRNG", "Rule30RNG", "math/rand", "crypto/rand"}
+	rngNames := []string{"Rule30RNG", "math/rand", "crypto/rand"}
 	for _, rngName := range rngNames {
 		fmt.Printf("%-15s", rngName)
 
@@ -220,42 +213,6 @@ func main() {
 		}
 		avgThroughput := totalThroughput / float64(len(sizes))
 		fmt.Printf("│ %6.1f MB\n", avgThroughput)
-	}
-
-	fmt.Println()
-
-	// Speedup comparison table
-	fmt.Println("═══════════════════════════════════════════════════════════")
-	fmt.Println("  Relative Performance (vs TurmiteRNG)")
-	fmt.Println("═══════════════════════════════════════════════════════════")
-	fmt.Println()
-
-	fmt.Printf("%-15s", "RNG")
-	for _, size := range sizes {
-		fmt.Printf("│ %8s ", formatSize(size))
-	}
-	fmt.Printf("│ Average\n")
-
-	fmt.Println("───────────────┼──────────┼──────────┼──────────┼──────────┼──────────")
-
-	for _, rngName := range rngNames {
-		fmt.Printf("%-15s", rngName)
-
-		var totalSpeedup float64
-		for _, size := range sizes {
-			baseline := results["TurmiteRNG"][size].throughput
-			current := results[rngName][size].throughput
-			speedup := current / baseline
-
-			if speedup >= 1.0 {
-				fmt.Printf("│ %6.1fx   ", speedup)
-			} else {
-				fmt.Printf("│ 1.0x     ")
-			}
-			totalSpeedup += speedup
-		}
-		avgSpeedup := totalSpeedup / float64(len(sizes))
-		fmt.Printf("│ %6.1fx\n", avgSpeedup)
 	}
 
 	fmt.Println()
@@ -327,7 +284,6 @@ func main() {
 
 	// Additional info
 	fmt.Println("Notes:")
-	fmt.Println("  • TurmiteRNG: 2D cellular automaton (turmite), deterministic")
 	fmt.Println("  • Rule30RNG:  1D CA (Rule 30), 256-bit state, deterministic")
 	fmt.Println("  • math/rand:  Fast PRNG, deterministic")
 	fmt.Println("  • crypto/rand: Hardware-accelerated, cryptographically secure")
