@@ -28,14 +28,14 @@ Benchmark results on Apple Silicon (M-series):
 ## Installation
 
 ```bash
-go install github.com/yourusername/rule30-rng@latest
+go install github.com/vrypan/rule30rnd@latest
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/yourusername/rule30-rng
-cd rule30-rng
+git clone https://github.com/vrypan/rule30rnd
+cd rule30rnd
 make all
 ```
 
