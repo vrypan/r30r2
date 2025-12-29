@@ -7,7 +7,7 @@ A high-performance pseudo-random number generator based on Rule 30 cellular auto
 Rule 30 RND generates pseudo-random numbers using a 1D cellular automaton (Rule 30) on a circular 256-bit strip. Rule 30 is known for producing high-quality randomness and is famously used in Mathematica's default random number generator.
 
 **Key Features:**
-- **Extremely fast**: 5,213 MB/s average throughput (4.2× faster than math/rand, 1.5× faster than crypto/rand)
+- **Extremely fast**: 4.2× faster than math/rand, 1.5× faster than crypto/rand (on macOS/M4)
 - **Perfect entropy**: 8.0000 bits/byte (maximum possible)
 - **Excellent distribution**: Chi-square 253.9 (nearly ideal uniform distribution)
 - **Deterministic**: Same seed always produces same output
@@ -215,7 +215,7 @@ new_bit = left XOR (center OR right)
 - Our method samples the full spatial pattern at each instant
 - Both produce excellent randomness - ours is just more efficient
 
-This spatial extraction approach is why we achieve 5,000+ MB/s throughput while maintaining perfect entropy and distribution.
+This spatial extraction approach is why we achieve 4x throughput vs math/rand, while maintaining perfect entropy and distribution.
 
 ## Randomness Quality
 
