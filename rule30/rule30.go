@@ -33,27 +33,31 @@ func New(seed uint64) *RNG {
 // Optimized for 64-bit architecture: processes 64 bits at once, fully unrolled
 func (r *RNG) Step() {
 	// Fully unrolled loop for maximum performance
-	// Each operation processes 64 bits in parallel
+	// Cache state words locally (cheaper than repeated array indexing)
+	s0 := r.state[0]
+	s1 := r.state[1]
+	s2 := r.state[2]
+	s3 := r.state[3]
 
 	// Word 0: left neighbor from word 3, right neighbor from word 1
-	left0 := (r.state[0] >> 1) | (r.state[3] << 63)
-	right0 := (r.state[0] << 1) | (r.state[1] >> 63)
-	new0 := left0 ^ (r.state[0] | right0)
+	left0 := (s0 >> 1) | (s3 << 63)
+	right0 := (s0 << 1) | (s1 >> 63)
+	new0 := left0 ^ (s0 | right0)
 
 	// Word 1: left neighbor from word 0, right neighbor from word 2
-	left1 := (r.state[1] >> 1) | (r.state[0] << 63)
-	right1 := (r.state[1] << 1) | (r.state[2] >> 63)
-	new1 := left1 ^ (r.state[1] | right1)
+	left1 := (s1 >> 1) | (s0 << 63)
+	right1 := (s1 << 1) | (s2 >> 63)
+	new1 := left1 ^ (s1 | right1)
 
 	// Word 2: left neighbor from word 1, right neighbor from word 3
-	left2 := (r.state[2] >> 1) | (r.state[1] << 63)
-	right2 := (r.state[2] << 1) | (r.state[3] >> 63)
-	new2 := left2 ^ (r.state[2] | right2)
+	left2 := (s2 >> 1) | (s1 << 63)
+	right2 := (s2 << 1) | (s3 >> 63)
+	new2 := left2 ^ (s2 | right2)
 
 	// Word 3: left neighbor from word 2, right neighbor from word 0 (circular)
-	left3 := (r.state[3] >> 1) | (r.state[2] << 63)
-	right3 := (r.state[3] << 1) | (r.state[0] >> 63)
-	new3 := left3 ^ (r.state[3] | right3)
+	left3 := (s3 >> 1) | (s2 << 63)
+	right3 := (s3 << 1) | (s0 >> 63)
+	new3 := left3 ^ (s3 | right3)
 
 	// Update state
 	r.state[0] = new0
@@ -67,20 +71,34 @@ func (r *RNG) Step() {
 // so every 4 Read() calls of 8 bytes fully utilizes one Step() with no waste.
 func (r *RNG) Read(buf []byte) (n int, err error) {
 	i := 0
-	for i < len(buf) {
-		// Generate 8 bytes via Uint64()
-		// Every 4 calls triggers Step() to generate fresh 32-byte state
-		val := r.Uint64()
-		var b [8]byte
-		binary.LittleEndian.PutUint64(b[:], val)
+	limit := len(buf)
 
-		// Copy up to 8 bytes or whatever is left in buf
-		// Partial reads may discard unused bytes (acceptable for simplicity)
-		copied := copy(buf[i:], b[:])
-		i += copied
+	// Fill full uint64 chunks directly into the destination buffer
+	for limit-i >= 8 {
+		if r.pos >= 4 {
+			r.Step()
+			r.pos = 0
+		}
+		binary.LittleEndian.PutUint64(buf[i:], r.state[r.pos])
+		r.pos++
+		i += 8
 	}
 
-	return len(buf), nil
+	// Handle the remaining tail bytes, if any, without creating a temporary buffer
+	if rem := limit - i; rem > 0 {
+		if r.pos >= 4 {
+			r.Step()
+			r.pos = 0
+		}
+		val := r.state[r.pos]
+		r.pos++
+		for j := 0; j < rem; j++ {
+			buf[i+j] = byte(val)
+			val >>= 8
+		}
+	}
+
+	return limit, nil
 }
 
 // CopyState returns a copy of the current state
