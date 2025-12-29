@@ -32,6 +32,7 @@ type BenchResult struct {
 	duration   time.Duration
 	throughput float64 // MB/s
 	entropy    float64 // Shannon entropy (bits per byte)
+	chiSquare  float64 // Chi-square statistic
 }
 
 // calculateEntropy computes Shannon entropy in bits per byte
@@ -61,6 +62,32 @@ func calculateEntropy(data []byte) float64 {
 	return entropy
 }
 
+// calculateChiSquare computes chi-square statistic for uniform distribution test
+func calculateChiSquare(data []byte) float64 {
+	if len(data) == 0 {
+		return 0
+	}
+
+	// Count frequency of each byte value
+	freq := make([]int, 256)
+	for _, b := range data {
+		freq[b]++
+	}
+
+	// Expected frequency for uniform distribution
+	expected := float64(len(data)) / 256.0
+
+	// Calculate chi-square: χ² = Σ((observed - expected)² / expected)
+	chiSquare := 0.0
+	for _, count := range freq {
+		observed := float64(count)
+		diff := observed - expected
+		chiSquare += (diff * diff) / expected
+	}
+
+	return chiSquare
+}
+
 // runBenchmark tests an io.Reader and returns results
 func runBenchmark(name string, r io.Reader, size int, iterations int) BenchResult {
 	buf := make([]byte, size)
@@ -81,8 +108,9 @@ func runBenchmark(name string, r io.Reader, size int, iterations int) BenchResul
 	totalBytes := float64(size * iterations)
 	throughput := totalBytes / duration.Seconds() / 1024 / 1024 // MB/s
 
-	// Calculate entropy on collected data
+	// Calculate entropy and chi-square on collected data
 	entropy := calculateEntropy(allData)
+	chiSquare := calculateChiSquare(allData)
 
 	return BenchResult{
 		name:       name,
@@ -90,6 +118,7 @@ func runBenchmark(name string, r io.Reader, size int, iterations int) BenchResul
 		duration:   duration,
 		throughput: throughput,
 		entropy:    entropy,
+		chiSquare:  chiSquare,
 	}
 }
 
@@ -141,24 +170,24 @@ func main() {
 		turmite := New(12345)
 		result := runBenchmark("TurmiteRNG", turmite, size, iters)
 		results["TurmiteRNG"][size] = result
-		fmt.Printf("  ✓ TurmiteRNG:  %7.2f MB/s  (entropy: %.4f bits/byte)\n", result.throughput, result.entropy)
+		fmt.Printf("  ✓ TurmiteRNG:  %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
 
 		// Rule30RNG
 		rule30 := NewRule30(12345)
 		result = runBenchmark("Rule30RNG", rule30, size, iters)
 		results["Rule30RNG"][size] = result
-		fmt.Printf("  ✓ Rule30RNG:   %7.2f MB/s  (entropy: %.4f bits/byte)\n", result.throughput, result.entropy)
+		fmt.Printf("  ✓ Rule30RNG:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
 
 		// math/rand
 		mathRng := newMathRandReader(12345)
 		result = runBenchmark("math/rand", mathRng, size, iters)
 		results["math/rand"][size] = result
-		fmt.Printf("  ✓ math/rand:   %7.2f MB/s  (entropy: %.4f bits/byte)\n", result.throughput, result.entropy)
+		fmt.Printf("  ✓ math/rand:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
 
 		// crypto/rand
 		result = runBenchmark("crypto/rand", cryptorand.Reader, size, iters)
 		results["crypto/rand"][size] = result
-		fmt.Printf("  ✓ crypto/rand: %7.2f MB/s  (entropy: %.4f bits/byte)\n", result.throughput, result.entropy)
+		fmt.Printf("  ✓ crypto/rand: %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
 
 		fmt.Println()
 	}
@@ -261,6 +290,38 @@ func main() {
 	fmt.Println()
 	fmt.Println("Note: Maximum entropy = 8.000000 bits/byte (perfect randomness)")
 	fmt.Println()
+
+	// Chi-square comparison table
+	fmt.Println("═══════════════════════════════════════════════════════════")
+	fmt.Println("  Chi-Square Distribution Test")
+	fmt.Println("═══════════════════════════════════════════════════════════")
+	fmt.Println()
+
+	fmt.Printf("%-15s", "RNG")
+	for _, size := range sizes {
+		fmt.Printf("│ %8s ", formatSize(size))
+	}
+	fmt.Printf("│ Average\n")
+
+	fmt.Println("───────────────┼──────────┼──────────┼──────────┼──────────┼──────────")
+
+	for _, rngName := range rngNames {
+		fmt.Printf("%-15s", rngName)
+
+		var totalChiSquare float64
+		for _, size := range sizes {
+			result := results[rngName][size]
+			fmt.Printf("│  %7.1f ", result.chiSquare)
+			totalChiSquare += result.chiSquare
+		}
+		avgChiSquare := totalChiSquare / float64(len(sizes))
+		fmt.Printf("│  %7.1f\n", avgChiSquare)
+	}
+
+	fmt.Println()
+	fmt.Println("Note: Expected value ≈ 255 for uniform distribution (df=255)")
+	fmt.Println("      Acceptable range: ~200-310 (within 95% confidence)")
+	fmt.Println()
 	fmt.Println("═══════════════════════════════════════════════════════════")
 	fmt.Println()
 
@@ -276,5 +337,10 @@ func main() {
 	fmt.Println("  7.900-7.990: Good randomness")
 	fmt.Println("  7.500-7.900: Fair randomness")
 	fmt.Println("  < 7.500:     Poor randomness")
+	fmt.Println()
+	fmt.Println("Chi-Square Interpretation (df=255):")
+	fmt.Println("  200-310:     Excellent (within 95% confidence interval)")
+	fmt.Println("  180-330:     Good (within 99% confidence interval)")
+	fmt.Println("  < 180/> 330: Poor (distribution not uniform)")
 	fmt.Println()
 }
