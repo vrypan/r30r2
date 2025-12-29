@@ -1,6 +1,7 @@
 # Binaries
 rule30-rng
 rule30-compare
+stdlib-rng
 
 # Test/benchmark outputs
 *.bin

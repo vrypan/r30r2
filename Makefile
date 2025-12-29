@@ -101,14 +101,9 @@ testdata: $(RULE30_BIN)
 	./$(RULE30_BIN) --bytes=1048576 > testdata.bin
 	@echo "✓ Generated testdata.bin (1MB)"
 
-# Test randomness with ent (if available)
-test-entropy: testdata
-	@if command -v ent >/dev/null 2>&1; then \
-		echo "Testing entropy with ent..."; \
-		ent testdata.bin; \
-	else \
-		echo "ent not installed. Install with: brew install ent"; \
-	fi
+# Test randomness with ent - compares all three RNGs
+test-entropy: rule30
+	@./test-entropy.sh
 
 # Quick smoke test
 smoke: rule30
