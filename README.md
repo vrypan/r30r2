@@ -7,23 +7,46 @@ A high-performance pseudo-random number generator based on Rule 30 cellular auto
 Rule 30 RND generates pseudo-random numbers using a 1D cellular automaton (Rule 30) on a circular 256-bit strip. Rule 30 is known for producing high-quality randomness and is famously used in Mathematica's default random number generator.
 
 **Key Features:**
-- **Extremely fast**: 4.2× faster than math/rand, 1.5× faster than crypto/rand (on macOS/M4)
+- **High performance**: Competitive with math/rand for Uint64() (~1.0×), 3.3× faster for byte streams
 - **Perfect entropy**: 8.0000 bits/byte (maximum possible)
 - **Excellent distribution**: Chi-square 253.9 (nearly ideal uniform distribution)
 - **Deterministic**: Same seed always produces same output
-- **Simple implementation**: ~110 lines of optimized Go code
+- **Simple implementation**: ~220 lines of optimized Go code with math/rand interface
 
 ## Performance
 
-Benchmark results on Apple Silicon (M-series):
+Rule 30 RND offers different performance characteristics depending on use case:
+
+### Uint64() Benchmark - Fair RNG Algorithm Comparison
+
+This benchmark compares the underlying RNG algorithms using their primitive `Uint64()` operation:
 
 | RNG         | Throughput | vs Rule30 | Entropy | Chi-Square |
 |-------------|------------|-----------|---------|------------|
-| Rule30RND   | 5,213 MB/s | 1.0×      | 8.0000  | 253.9      |
-| crypto/rand | 3,515 MB/s | 0.67×     | 8.0000  | 245.7      |
-| math/rand   | 1,234 MB/s | 0.24×     | 8.0000  | 272.3      |
+| math/rand   | 1,330 MB/s | 1.05×     | 8.0000  | 291.6      |
+| Rule30RND   | 1,270 MB/s | 1.0×      | 8.0000  | 253.0      |
+| crypto/rand |   121 MB/s | 0.10×     | 8.0000  | 245.2      |
 
-*All values show excellent randomness quality (entropy = 8.0, chi-square ≈ 255)*
+*Rule30 and math/rand have comparable Uint64() performance*
+
+### Read() Benchmark - Bulk Byte Stream Generation
+
+This benchmark measures bulk byte stream performance (useful for file generation, simulations):
+
+| RNG         | Throughput | vs Rule30 | Entropy | Chi-Square |
+|-------------|------------|-----------|---------|------------|
+| Rule30RND   | 4,081 MB/s | 1.0×      | 8.0000  | 253.9      |
+| crypto/rand | 3,539 MB/s | 0.87×     | 8.0000  | 273.3      |
+| math/rand   | 1,241 MB/s | 0.30×     | 8.0000  | 272.3      |
+
+*Rule30 is optimized for bulk generation (32 bytes per iteration)*
+
+**Key Takeaways:**
+- **For `Uint64()` calls**: Rule30 and math/rand have comparable performance (~1.05× difference)
+- **For byte streams**: Rule30 is fastest due to bulk generation design (3.3× faster)
+- **All RNGs**: Perfect entropy (8.0) and excellent distribution (chi-square ~255)
+
+Run `./rule30-compare -mode=uint64` or `./rule30-compare -mode=read` to see detailed benchmarks.
 
 ## Installation
 
@@ -185,8 +208,9 @@ new_bit = left XOR (center OR right)
 
 1. **Bit-level parallelism**: 64 bits updated per operation (vs 1 bit serially)
 2. **Loop unrolling**: Zero loop overhead for state evolution
-3. **Immediate extraction**: No wasted iterations (generates 32 bytes per step)
-4. **Simple operations**: Only XOR, OR, and bit shifts (1 CPU cycle each)
+3. **Direct state extraction**: Uint64() extracts directly from state array (no byte conversion)
+4. **Bulk byte generation**: Read() produces 32 bytes per step (no wasted iterations)
+5. **Simple operations**: Only XOR, OR, and bit shifts (1 CPU cycle each)
 
 ### Differences from Traditional Rule 30 RNG
 

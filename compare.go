@@ -2,6 +2,8 @@ package main
 
 import (
 	cryptorand "crypto/rand"
+	"encoding/binary"
+	"flag"
 	"fmt"
 	"io"
 	"math"
@@ -124,6 +126,37 @@ func runBenchmark(name string, r io.Reader, size int, iterations int) BenchResul
 	}
 }
 
+// runUint64Benchmark tests Uint64() generation and returns results
+func runUint64Benchmark(name string, iterations int, genFunc func() uint64) BenchResult {
+	// Collect data for entropy calculation
+	allData := make([]byte, 0, iterations*8)
+	buf := make([]byte, 8)
+
+	start := time.Now()
+	for i := 0; i < iterations; i++ {
+		val := genFunc()
+		binary.LittleEndian.PutUint64(buf, val)
+		allData = append(allData, buf...)
+	}
+	duration := time.Since(start)
+
+	totalBytes := float64(iterations * 8)
+	throughput := totalBytes / duration.Seconds() / 1024 / 1024 // MB/s
+
+	// Calculate entropy and chi-square on collected data
+	entropy := calculateEntropy(allData)
+	chiSquare := calculateChiSquare(allData)
+
+	return BenchResult{
+		name:       name,
+		size:       iterations * 8,
+		duration:   duration,
+		throughput: throughput,
+		entropy:    entropy,
+		chiSquare:  chiSquare,
+	}
+}
+
 // formatSize formats bytes as KB or MB
 func formatSize(bytes int) string {
 	if bytes >= 1024*1024 {
@@ -133,6 +166,10 @@ func formatSize(bytes int) string {
 }
 
 func main() {
+	// Parse command line flags
+	mode := flag.String("mode", "both", "Benchmark mode: read, uint64, or both")
+	flag.Parse()
+
 	fmt.Println("═══════════════════════════════════════════════════════════")
 	fmt.Println("  Random Number Generator Performance Comparison")
 	fmt.Println("═══════════════════════════════════════════════════════════")
@@ -154,37 +191,115 @@ func main() {
 		1024 * 1024:   100,    // 1 MB: 100 iterations
 	}
 
+	// Validate mode
+	if *mode != "read" && *mode != "uint64" && *mode != "both" {
+		fmt.Fprintf(os.Stderr, "Error: Invalid mode '%s'. Use 'read', 'uint64', or 'both'\n", *mode)
+		os.Exit(1)
+	}
+
 	// Store results by RNG type and size
 	results := make(map[string]map[int]BenchResult)
 	results["Rule30RNG"] = make(map[int]BenchResult)
 	results["math/rand"] = make(map[int]BenchResult)
 	results["crypto/rand"] = make(map[int]BenchResult)
 
-	// Run benchmarks for each size
-	for _, size := range sizes {
-		iters := iterations[size]
-		sizeStr := formatSize(size)
+	// Run Read() benchmarks
+	if *mode == "read" || *mode == "both" {
+		if *mode == "both" {
+			fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+			fmt.Println("  Benchmark 1: Read() - Bulk Byte Generation")
+			fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+			fmt.Println()
+			fmt.Println("This benchmark measures bulk byte stream generation performance.")
+			fmt.Println("Rule30 is optimized for this (32 bytes/iteration).")
+			fmt.Println("math/rand.Read() is a convenience wrapper over Int63().")
+			fmt.Println()
+		}
 
-		fmt.Printf("Testing with %s buffers (%d iterations)...\n", sizeStr, iters)
+		for _, size := range sizes {
+			iters := iterations[size]
+			sizeStr := formatSize(size)
 
-		// Rule30RNG
-		rule30rng := rule30.New(12345)
-		result := runBenchmark("Rule30RNG", rule30rng, size, iters)
-		results["Rule30RNG"][size] = result
-		fmt.Printf("  ✓ Rule30RNG:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
+			fmt.Printf("Testing with %s buffers (%d iterations)...\n", sizeStr, iters)
 
-		// math/rand
-		mathRng := newMathRandReader(12345)
-		result = runBenchmark("math/rand", mathRng, size, iters)
-		results["math/rand"][size] = result
-		fmt.Printf("  ✓ math/rand:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
+			// Rule30RNG
+			rule30rng := rule30.New(12345)
+			result := runBenchmark("Rule30RNG", rule30rng, size, iters)
+			results["Rule30RNG"][size] = result
+			fmt.Printf("  ✓ Rule30RNG:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
 
-		// crypto/rand
-		result = runBenchmark("crypto/rand", cryptorand.Reader, size, iters)
-		results["crypto/rand"][size] = result
-		fmt.Printf("  ✓ crypto/rand: %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
+			// math/rand
+			mathRng := newMathRandReader(12345)
+			result = runBenchmark("math/rand", mathRng, size, iters)
+			results["math/rand"][size] = result
+			fmt.Printf("  ✓ math/rand:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
 
-		fmt.Println()
+			// crypto/rand
+			result = runBenchmark("crypto/rand", cryptorand.Reader, size, iters)
+			results["crypto/rand"][size] = result
+			fmt.Printf("  ✓ crypto/rand: %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
+
+			fmt.Println()
+		}
+	}
+
+	// Run Uint64() benchmarks
+	if *mode == "uint64" || *mode == "both" {
+		if *mode == "both" {
+			fmt.Println()
+			fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+			fmt.Println("  Benchmark 2: Uint64() - Fair RNG Algorithm Comparison")
+			fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+			fmt.Println()
+			fmt.Println("This benchmark compares the underlying RNG algorithms fairly.")
+			fmt.Println("All RNGs generate 64-bit values using their primitive operations.")
+			fmt.Println()
+		}
+
+		// Uint64 iterations (generating 8 bytes each)
+		uint64Iterations := []struct {
+			count int
+			desc  string
+		}{
+			{10000000, "10M values (80 MB)"},
+			{50000000, "50M values (400 MB)"},
+		}
+
+		// crypto/rand Uint64 wrapper
+		cryptoUint64 := func() uint64 {
+			var buf [8]byte
+			cryptorand.Read(buf[:])
+			return binary.LittleEndian.Uint64(buf[:])
+		}
+
+		for _, test := range uint64Iterations {
+			fmt.Printf("Testing %s...\n", test.desc)
+
+			// Rule30RNG
+			rule30rng := rule30.New(12345)
+			result := runUint64Benchmark("Rule30RNG", test.count, rule30rng.Uint64)
+			// Store in results using size as key (for table generation)
+			results["Rule30RNG"][test.count*8] = result
+			fmt.Printf("  ✓ Rule30RNG:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
+
+			// math/rand
+			mathRng := mathrand.New(mathrand.NewSource(12345))
+			result = runUint64Benchmark("math/rand", test.count, mathRng.Uint64)
+			results["math/rand"][test.count*8] = result
+			fmt.Printf("  ✓ math/rand:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
+
+			// crypto/rand
+			result = runUint64Benchmark("crypto/rand", test.count, cryptoUint64)
+			results["crypto/rand"][test.count*8] = result
+			fmt.Printf("  ✓ crypto/rand: %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
+
+			fmt.Println()
+		}
+
+		// Update sizes for table generation in Uint64 mode
+		if *mode == "uint64" {
+			sizes = []int{80000000, 400000000} // 10M and 50M * 8 bytes
+		}
 	}
 
 	// Generate summary table

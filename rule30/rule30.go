@@ -8,14 +8,14 @@ import (
 // RNG implements a 1D cellular automaton (Rule 30) on a circular 256-bit strip
 // Optimized for 64-bit architectures using uint64 words
 type RNG struct {
-	state  [4]uint64 // 256 bits as 4 × 64-bit words
-	buffer []byte
+	state [4]uint64 // 256 bits as 4 × 64-bit words
+	pos   int       // position in state for Uint64() extraction (0-3)
 }
 
 // New creates a new Rule 30 RNG from a seed
 func New(seed uint64) *RNG {
 	rng := &RNG{
-		buffer: make([]byte, 0, 32),
+		pos: 4, // Force Step() on first Uint64() call
 	}
 
 	// Initialize state from seed
@@ -63,43 +63,24 @@ func (r *RNG) Step() {
 }
 
 // Read implements io.Reader interface
+// Reads in 8-byte (uint64) chunks. Each Step() generates 32 bytes (4 uint64s),
+// so every 4 Read() calls of 8 bytes fully utilizes one Step() with no waste.
 func (r *RNG) Read(buf []byte) (n int, err error) {
-	needed := len(buf)
-	copied := 0
+	i := 0
+	for i < len(buf) {
+		// Generate 8 bytes via Uint64()
+		// Every 4 calls triggers Step() to generate fresh 32-byte state
+		val := r.Uint64()
+		var b [8]byte
+		binary.LittleEndian.PutUint64(b[:], val)
 
-	// Use leftover buffer first
-	if len(r.buffer) > 0 {
-		n := copy(buf, r.buffer)
-		r.buffer = r.buffer[n:]
-		copied += n
-		if copied >= needed {
-			return copied, nil
-		}
+		// Copy up to 8 bytes or whatever is left in buf
+		// Partial reads may discard unused bytes (acceptable for simplicity)
+		copied := copy(buf[i:], b[:])
+		i += copied
 	}
 
-	// Generate more bytes as needed
-	for copied < needed {
-		// Run single Rule 30 iteration (produces 256 new bits = 32 bytes)
-		r.Step()
-
-		// Extract all 32 bytes from current state
-		// Convert uint64 words to bytes (little-endian)
-		var output [32]byte
-		binary.LittleEndian.PutUint64(output[0:8], r.state[0])
-		binary.LittleEndian.PutUint64(output[8:16], r.state[1])
-		binary.LittleEndian.PutUint64(output[16:24], r.state[2])
-		binary.LittleEndian.PutUint64(output[24:32], r.state[3])
-
-		n := copy(buf[copied:], output[:])
-		copied += n
-
-		// Save leftover bytes
-		if n < len(output) {
-			r.buffer = append(r.buffer[:0], output[n:]...)
-		}
-	}
-
-	return copied, nil
+	return len(buf), nil
 }
 
 // CopyState returns a copy of the current state
@@ -109,16 +90,22 @@ func (r *RNG) CopyState() [4]uint64 {
 
 // Uint32 returns a random uint32
 func (r *RNG) Uint32() uint32 {
-	var buf [4]byte
-	r.Read(buf[:])
-	return binary.LittleEndian.Uint32(buf[:])
+	return uint32(r.Uint64())
 }
 
 // Uint64 returns a random uint64
+// Optimized to extract directly from state without byte conversion
 func (r *RNG) Uint64() uint64 {
-	var buf [8]byte
-	r.Read(buf[:])
-	return binary.LittleEndian.Uint64(buf[:])
+	// Generate new state if we've exhausted all 4 uint64 values
+	if r.pos >= 4 {
+		r.Step()
+		r.pos = 0
+	}
+
+	// Extract uint64 directly from state
+	val := r.state[r.pos]
+	r.pos++
+	return val
 }
 
 // Int63 returns a non-negative random int64 (0 to 2^63-1)
