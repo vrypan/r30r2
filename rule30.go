@@ -78,11 +78,8 @@ func (r *Rule30RNG) Read(buf []byte) (n int, err error) {
 
 	// Generate more bytes as needed
 	for copied < needed {
-		// Run Rule 30 iterations to mix state
-		// Using 8 iterations per 32-byte extraction for good mixing
-		for i := 0; i < 8; i++ {
-			r.Step()
-		}
+		// Run single Rule 30 iteration (produces 256 new bits = 32 bytes)
+		r.Step()
 
 		// Extract all 32 bytes from current state
 		// Convert uint64 words to bytes (little-endian)

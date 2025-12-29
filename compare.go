@@ -267,7 +267,7 @@ func main() {
 	// Additional info
 	fmt.Println("Notes:")
 	fmt.Println("  • TurmiteRNG: 2D cellular automaton (turmite), deterministic")
-	fmt.Println("  • Rule30RNG:  1D cellular automaton (Rule 30), deterministic")
+	fmt.Println("  • Rule30RNG:  1D CA (Rule 30), 256-bit state, deterministic")
 	fmt.Println("  • math/rand:  Fast PRNG, deterministic")
 	fmt.Println("  • crypto/rand: Hardware-accelerated, cryptographically secure")
 	fmt.Println()

@@ -83,7 +83,7 @@ func generateBytesRule30(seed uint64, count int) {
 	fmt.Fprintf(os.Stderr, "  Seed: 0x%016X (%d)\n", seed, seed)
 	fmt.Fprintf(os.Stderr, "  Strip: 256-bit circular\n")
 	fmt.Fprintf(os.Stderr, "  Rule: 30 (left XOR (center OR right))\n")
-	fmt.Fprintf(os.Stderr, "  Iterations: 8 per 32-byte block\n")
+	fmt.Fprintf(os.Stderr, "  Output: 32 bytes per iteration\n")
 	fmt.Fprintf(os.Stderr, "Generating %d bytes...\n", count)
 
 	buf := make([]byte, count)
