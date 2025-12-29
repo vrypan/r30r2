@@ -2,7 +2,8 @@
 
 # Binary names
 RULE30_BIN = rule30-rng
-COMPARE_BIN = rule30-compare
+COMPARE_READ_BIN = compare-read
+COMPARE_UINT64_BIN = compare-uint64
 
 # Go parameters
 GOCMD = go
@@ -17,9 +18,10 @@ BUILD_FLAGS = -ldflags "$(LDFLAGS)"
 
 # Source files
 RULE30_SOURCES = rule30-main.go rule30-cli.go
-COMPARE_SOURCES = compare.go
+COMPARE_READ_SOURCES = compare-read.go
+COMPARE_UINT64_SOURCES = compare-uint64.go
 
-.PHONY: all rule30 compare clean fmt help compare-run test-entropy smoke deps
+.PHONY: all rule30 compare compare-read compare-uint64 clean fmt help compare-run test-entropy smoke deps
 
 # Default target
 all: rule30 compare
@@ -32,18 +34,32 @@ $(RULE30_BIN): $(RULE30_SOURCES)
 	$(GOBUILD) $(BUILD_FLAGS) -o $(RULE30_BIN) $(RULE30_SOURCES)
 	@echo "✓ Built $(RULE30_BIN)"
 
-# Build the comparison tool
-compare: $(COMPARE_BIN)
+# Build both comparison tools
+compare: compare-read compare-uint64
 
-$(COMPARE_BIN): $(COMPARE_SOURCES)
-	@echo "Building $(COMPARE_BIN)..."
-	$(GOBUILD) $(BUILD_FLAGS) -o $(COMPARE_BIN) $(COMPARE_SOURCES)
-	@echo "✓ Built $(COMPARE_BIN)"
+# Build the Read() comparison tool
+compare-read: $(COMPARE_READ_BIN)
+
+$(COMPARE_READ_BIN): $(COMPARE_READ_SOURCES)
+	@echo "Building $(COMPARE_READ_BIN)..."
+	$(GOBUILD) $(BUILD_FLAGS) -o $(COMPARE_READ_BIN) $(COMPARE_READ_SOURCES)
+	@echo "✓ Built $(COMPARE_READ_BIN)"
+
+# Build the Uint64() comparison tool
+compare-uint64: $(COMPARE_UINT64_BIN)
+
+$(COMPARE_UINT64_BIN): $(COMPARE_UINT64_SOURCES)
+	@echo "Building $(COMPARE_UINT64_BIN)..."
+	$(GOBUILD) $(BUILD_FLAGS) -o $(COMPARE_UINT64_BIN) $(COMPARE_UINT64_SOURCES)
+	@echo "✓ Built $(COMPARE_UINT64_BIN)"
 
 # Run comparison benchmarks
-compare-run: $(COMPARE_BIN)
-	@echo "Running performance comparison..."
-	./$(COMPARE_BIN)
+compare-run: compare
+	@echo "Running Read() benchmark..."
+	./$(COMPARE_READ_BIN)
+	@echo ""
+	@echo "Running Uint64() benchmark..."
+	./$(COMPARE_UINT64_BIN)
 
 # Format code
 fmt:
@@ -56,7 +72,9 @@ clean:
 	@echo "Cleaning..."
 	$(GOCLEAN)
 	rm -f $(RULE30_BIN)
-	rm -f $(COMPARE_BIN)
+	rm -f $(COMPARE_READ_BIN)
+	rm -f $(COMPARE_UINT64_BIN)
+	rm -f rule30-compare
 	rm -f *.prof
 	rm -f *.test
 	rm -f *.bin
@@ -90,8 +108,10 @@ help:
 	@echo "Targets:"
 	@echo "  all            Build all binaries (default)"
 	@echo "  rule30         Build rule30-rng CLI tool"
-	@echo "  compare        Build rule30-compare tool"
-	@echo "  compare-run    Run performance comparison"
+	@echo "  compare        Build comparison tools (read + uint64)"
+	@echo "  compare-read   Build compare-read tool (MB/s benchmark)"
+	@echo "  compare-uint64 Build compare-uint64 tool (ns/call benchmark)"
+	@echo "  compare-run    Run both comparison benchmarks"
 	@echo "  fmt            Format code with gofmt"
 	@echo "  clean          Remove build artifacts"
 	@echo "  deps           Download and tidy dependencies"
