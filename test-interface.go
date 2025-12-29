@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math"
+
+	"github.com/vrypan/rule30rnd/rule30"
 )
 
 func main() {
@@ -10,7 +12,7 @@ func main() {
 	fmt.Println("====================================================")
 	fmt.Println()
 
-	rng := NewRule30(12345)
+	rng := rule30.New(12345)
 
 	// Test Uint32/Uint64
 	fmt.Println("Basic integer generation:")

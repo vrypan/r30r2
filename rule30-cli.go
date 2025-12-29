@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/vrypan/rule30rnd/rule30"
 )
 
 func mainRule30() {
@@ -77,7 +79,7 @@ Rule 30:
 
 // generateBytesRule30 generates and writes random bytes to stdout
 func generateBytesRule30(seed uint64, count int) {
-	rng := NewRule30(seed)
+	rng := rule30.New(seed)
 
 	fmt.Fprintf(os.Stderr, "Rule 30 RNG initialized\n")
 	fmt.Fprintf(os.Stderr, "  Seed: 0x%016X (%d)\n", seed, seed)
@@ -105,7 +107,7 @@ func generateBytesRule30(seed uint64, count int) {
 
 // runBenchmarkRule30 measures RNG throughput
 func runBenchmarkRule30(seed uint64) {
-	rng := NewRule30(seed)
+	rng := rule30.New(seed)
 
 	sizes := []int{1024, 10240, 102400, 1048576} // 1KB, 10KB, 100KB, 1MB
 

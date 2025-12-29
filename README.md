@@ -27,6 +27,8 @@ Benchmark results on Apple Silicon (M-series):
 
 ## Installation
 
+### As a Command-Line Tool
+
 ```bash
 go install github.com/vrypan/rule30rnd@latest
 ```
@@ -37,6 +39,20 @@ Or build from source:
 git clone https://github.com/vrypan/rule30rnd
 cd rule30rnd
 make all
+```
+
+### As a Library
+
+Add to your Go project:
+
+```bash
+go get github.com/vrypan/rule30rnd
+```
+
+Import in your code:
+
+```go
+import "github.com/vrypan/rule30rnd/rule30"
 ```
 
 ## Usage
@@ -56,20 +72,21 @@ Generate random bytes:
 ./rule30-rng --benchmark
 ```
 
-### As a Library
+### Using the Library
 
-Rule30RNG is compatible with Go's `math/rand` interface and can be used as a drop-in replacement:
+Rule30 RNG is compatible with Go's `math/rand` interface and can be used as a drop-in replacement:
 
 ```go
 package main
 
 import (
     "fmt"
+    "github.com/vrypan/rule30rnd/rule30"
 )
 
 func main() {
     // Create RNG with seed
-    rng := NewRule30(12345)
+    rng := rule30.New(12345)
 
     // Compatible with math/rand interface
     fmt.Printf("Uint32:    %d\n", rng.Uint32())

@@ -16,8 +16,8 @@ LDFLAGS = -s -w
 BUILD_FLAGS = -ldflags "$(LDFLAGS)"
 
 # Source files
-RULE30_SOURCES = rule30-main.go rule30-cli.go rule30.go
-COMPARE_SOURCES = compare.go rule30.go
+RULE30_SOURCES = rule30-main.go rule30-cli.go
+COMPARE_SOURCES = compare.go
 
 .PHONY: all rule30 compare clean fmt help compare-run test-entropy smoke deps
 

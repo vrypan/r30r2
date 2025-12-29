@@ -8,6 +8,8 @@ import (
 	mathrand "math/rand"
 	"os"
 	"time"
+
+	"github.com/vrypan/rule30rnd/rule30"
 )
 
 // mathRandReader wraps math/rand to implement io.Reader
@@ -166,8 +168,8 @@ func main() {
 		fmt.Printf("Testing with %s buffers (%d iterations)...\n", sizeStr, iters)
 
 		// Rule30RNG
-		rule30 := NewRule30(12345)
-		result := runBenchmark("Rule30RNG", rule30, size, iters)
+		rule30rng := rule30.New(12345)
+		result := runBenchmark("Rule30RNG", rule30rng, size, iters)
 		results["Rule30RNG"][size] = result
 		fmt.Printf("  ✓ Rule30RNG:   %7.2f MB/s  (entropy: %.4f, χ²: %.1f)\n", result.throughput, result.entropy, result.chiSquare)
 

@@ -2,6 +2,7 @@
 rule30-rng
 rule30-compare
 stdlib-rng
+test-interface
 
 # Test/benchmark outputs
 *.bin
