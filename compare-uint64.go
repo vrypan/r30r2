@@ -52,10 +52,7 @@ func main() {
 
 	// Test configurations - call counts
 	callCounts := []int{
-		1000,    // 1k calls
-		10000,   // 10k calls
-		100000,  // 100k calls
-		1000000, // 1M calls
+		10000000, // 10M calls
 	}
 
 	// Store results by RNG type and call count
@@ -102,29 +99,16 @@ func main() {
 	fmt.Println()
 
 	// Table header
-	fmt.Printf("%-15s", "RNG")
-	for _, calls := range callCounts {
-		fmt.Printf(" │ %-12s", formatCalls(calls))
-	}
-	fmt.Println()
+	fmt.Printf("%-15s │ %-12s │ %-10s\n", "RNG", "10M ns/call", "Relative")
+	fmt.Println("────────────────┼──────────────┼────────────")
 
-	// Separator
-	fmt.Print("───────────────")
-	for range callCounts {
-		fmt.Print("─┼─────────────")
-	}
-	fmt.Println()
-
-	// Table rows
+	// Table rows with Rule30RNG as baseline
 	rngNames := []string{"Rule30RNG", "math/rand", "crypto/rand"}
+	baseline := results["Rule30RNG"][callCounts[0]].nsPerCall
 	for _, rngName := range rngNames {
-		fmt.Printf("%-15s", rngName)
-
-		for _, calls := range callCounts {
-			result := results[rngName][calls]
-			fmt.Printf(" │ %9.1f ns", result.nsPerCall)
-		}
-		fmt.Println()
+		result := results[rngName][callCounts[0]]
+		relative := result.nsPerCall / baseline
+		fmt.Printf("%-15s │ %9.1f ns │ %8.2f×\n", rngName, result.nsPerCall, relative)
 	}
 
 	fmt.Println()
