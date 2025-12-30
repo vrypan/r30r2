@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	mathrand "math/rand"
+	mathrandv2 "math/rand/v2"
 	"time"
 
 	"github.com/vrypan/rule30rnd/rand"
@@ -59,6 +60,7 @@ func main() {
 	results := make(map[string]map[int]BenchResult)
 	results["Rule30RNG"] = make(map[int]BenchResult)
 	results["math/rand"] = make(map[int]BenchResult)
+	results["math/rand/v2"] = make(map[int]BenchResult)
 	results["crypto/rand"] = make(map[int]BenchResult)
 
 	// crypto/rand Uint64 wrapper
@@ -82,12 +84,18 @@ func main() {
 		mathRng := mathrand.New(mathrand.NewSource(12345))
 		result = runUint64Benchmark("math/rand", calls, mathRng.Uint64)
 		results["math/rand"][calls] = result
-		fmt.Printf("  ✓ math/rand:   %6.1f ns/call\n", result.nsPerCall)
+		fmt.Printf("  ✓ math/rand:     %6.1f ns/call\n", result.nsPerCall)
+
+		// math/rand/v2
+		mathRngV2 := mathrandv2.New(mathrandv2.NewPCG(12345, 12345))
+		result = runUint64Benchmark("math/rand/v2", calls, mathRngV2.Uint64)
+		results["math/rand/v2"][calls] = result
+		fmt.Printf("  ✓ math/rand/v2:  %6.1f ns/call\n", result.nsPerCall)
 
 		// crypto/rand
 		result = runUint64Benchmark("crypto/rand", calls, cryptoUint64)
 		results["crypto/rand"][calls] = result
-		fmt.Printf("  ✓ crypto/rand: %6.1f ns/call\n", result.nsPerCall)
+		fmt.Printf("  ✓ crypto/rand:   %6.1f ns/call\n", result.nsPerCall)
 
 		fmt.Println()
 	}
@@ -103,7 +111,7 @@ func main() {
 	fmt.Println("────────────────┼──────────────┼────────────")
 
 	// Table rows with Rule30RNG as baseline
-	rngNames := []string{"Rule30RNG", "math/rand", "crypto/rand"}
+	rngNames := []string{"Rule30RNG", "math/rand", "math/rand/v2", "crypto/rand"}
 	baseline := results["Rule30RNG"][callCounts[0]].nsPerCall
 	for _, rngName := range rngNames {
 		result := results[rngName][callCounts[0]]
@@ -117,9 +125,10 @@ func main() {
 
 	// Additional info
 	fmt.Println("Notes:")
-	fmt.Println("  • Rule30RNG:  1D CA (Rule 30), 256-bit state, deterministic")
-	fmt.Println("  • math/rand:  Fast PRNG (PCG algorithm), deterministic")
-	fmt.Println("  • crypto/rand: Hardware-accelerated CSPRNG")
+	fmt.Println("  • Rule30RNG:    1D CA (Rule 30), 256-bit state, deterministic")
+	fmt.Println("  • math/rand:    Legacy PRNG (LFSR), deterministic")
+	fmt.Println("  • math/rand/v2: Modern PRNG (PCG), deterministic")
+	fmt.Println("  • crypto/rand:  Hardware-accelerated CSPRNG")
 	fmt.Println("  • Lower ns/call is better (faster)")
 	fmt.Println()
 }

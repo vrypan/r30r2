@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	mathrand "math/rand"
+	mathrandv2 "math/rand/v2"
 	"os"
 	"time"
 
@@ -23,6 +24,29 @@ func (m *mathRandReader) Read(p []byte) (n int, err error) {
 func newMathRandReader(seed int64) io.Reader {
 	return &mathRandReader{
 		rng: mathrand.New(mathrand.NewSource(seed)),
+	}
+}
+
+// mathRandV2Reader wraps math/rand/v2 to implement io.Reader
+type mathRandV2Reader struct {
+	rng *mathrandv2.Rand
+}
+
+func (m *mathRandV2Reader) Read(p []byte) (n int, err error) {
+	// math/rand/v2 doesn't have Read(), so implement it manually
+	for i := 0; i < len(p); i += 8 {
+		val := m.rng.Uint64()
+		for j := 0; j < 8 && i+j < len(p); j++ {
+			p[i+j] = byte(val)
+			val >>= 8
+		}
+	}
+	return len(p), nil
+}
+
+func newMathRandV2Reader(seed uint64) io.Reader {
+	return &mathRandV2Reader{
+		rng: mathrandv2.New(mathrandv2.NewPCG(seed, seed)),
 	}
 }
 
@@ -93,6 +117,7 @@ func main() {
 	results := make(map[string]map[int]BenchResult)
 	results["Rule30RNG"] = make(map[int]BenchResult)
 	results["math/rand"] = make(map[int]BenchResult)
+	results["math/rand/v2"] = make(map[int]BenchResult)
 	results["crypto/rand"] = make(map[int]BenchResult)
 
 	// Run benchmarks
@@ -112,12 +137,18 @@ func main() {
 		mathRng := newMathRandReader(12345)
 		result = runBenchmark("math/rand", mathRng, size, iters)
 		results["math/rand"][size] = result
-		fmt.Printf("  ✓ math/rand:   %7.2f MB/s\n", result.throughput)
+		fmt.Printf("  ✓ math/rand:     %7.2f MB/s\n", result.throughput)
+
+		// math/rand/v2
+		mathRngV2 := newMathRandV2Reader(12345)
+		result = runBenchmark("math/rand/v2", mathRngV2, size, iters)
+		results["math/rand/v2"][size] = result
+		fmt.Printf("  ✓ math/rand/v2:  %7.2f MB/s\n", result.throughput)
 
 		// crypto/rand
 		result = runBenchmark("crypto/rand", cryptorand.Reader, size, iters)
 		results["crypto/rand"][size] = result
-		fmt.Printf("  ✓ crypto/rand: %7.2f MB/s\n", result.throughput)
+		fmt.Printf("  ✓ crypto/rand:   %7.2f MB/s\n", result.throughput)
 
 		fmt.Println()
 	}
@@ -143,7 +174,7 @@ func main() {
 	fmt.Println()
 
 	// Table rows
-	rngNames := []string{"Rule30RNG", "math/rand", "crypto/rand"}
+	rngNames := []string{"Rule30RNG", "math/rand", "math/rand/v2", "crypto/rand"}
 	for _, rngName := range rngNames {
 		fmt.Printf("%-15s", rngName)
 
@@ -160,8 +191,9 @@ func main() {
 
 	// Additional info
 	fmt.Println("Notes:")
-	fmt.Println("  • Rule30RNG:  1D CA (Rule 30), 256-bit state, deterministic")
-	fmt.Println("  • math/rand:  Fast PRNG (PCG algorithm), deterministic")
-	fmt.Println("  • crypto/rand: Hardware-accelerated CSPRNG")
+	fmt.Println("  • Rule30RNG:    1D CA (Rule 30), 256-bit state, deterministic")
+	fmt.Println("  • math/rand:    Legacy PRNG (LFSR), deterministic")
+	fmt.Println("  • math/rand/v2: Modern PRNG (PCG), deterministic")
+	fmt.Println("  • crypto/rand:  Hardware-accelerated CSPRNG")
 	fmt.Println()
 }
