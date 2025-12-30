@@ -5,6 +5,9 @@
 
 set -e
 
+# Change to the directory where this script lives
+cd "$(dirname "$0")"
+
 # Test sizes: 1MB, 10MB, 100MB
 SIZES=(1048576 10485760 104857600)
 SIZE_LABELS=("1MB" "10MB" "100MB")
@@ -34,14 +37,14 @@ if ! command -v ent &> /dev/null; then
 fi
 
 # Build binaries if needed
-if [ ! -f ./rule30 ]; then
+if [ ! -f ../rule30 ]; then
     echo "Building rule30..."
-    make rule30 > /dev/null 2>&1
+    cd .. && make rule30 > /dev/null 2>&1 && cd misc
 fi
 
 if [ ! -f ./stdlib-rng ]; then
     echo "Building stdlib-rng..."
-    go build -o stdlib-rng stdlib-rng.go
+    go build -o ./stdlib-rng ./stdlib-rng.go
 fi
 
 # Temporary files
@@ -75,7 +78,7 @@ for i in "${!SIZES[@]}"; do
     MATH_FILE="$TMP_DIR/math_${LABEL}.bin"
     CRYPTO_FILE="$TMP_DIR/crypto_${LABEL}.bin"
 
-    ./rule30 --seed=$SEED --bytes=$BYTES > "$RULE30_FILE" 2>/dev/null
+    ../rule30 --seed=$SEED --bytes=$BYTES > "$RULE30_FILE" 2>/dev/null
     ./stdlib-rng --type=math --seed=$SEED --bytes=$BYTES > "$MATH_FILE" 2>/dev/null
     ./stdlib-rng --type=crypto --bytes=$BYTES > "$CRYPTO_FILE" 2>/dev/null
 

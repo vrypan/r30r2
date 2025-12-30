@@ -2,8 +2,8 @@
 
 # Binary names
 RULE30_BIN = rule30
-COMPARE_READ_BIN = compare-read
-COMPARE_UINT64_BIN = compare-uint64
+COMPARE_READ_BIN = misc/compare-read
+COMPARE_UINT64_BIN = misc/compare-uint64
 
 # Go parameters
 GOCMD = go
@@ -18,8 +18,8 @@ BUILD_FLAGS = -ldflags "$(LDFLAGS)"
 
 # Source files
 RULE30_SOURCES = rule30-main.go rule30-cli.go
-COMPARE_READ_SOURCES = compare-read.go
-COMPARE_UINT64_SOURCES = compare-uint64.go
+COMPARE_READ_SOURCES = misc/compare-read.go
+COMPARE_UINT64_SOURCES = misc/compare-uint64.go
 
 .PHONY: all rule30 compare compare-read compare-uint64 clean fmt help compare-run test-entropy smoke deps bench
 
@@ -63,7 +63,7 @@ compare-run: compare
 
 # Run go test benchmarks with table output
 bench:
-	@./bench-table.sh
+	@./misc/bench-table.sh
 
 # Format code
 fmt:
@@ -78,7 +78,7 @@ clean:
 	rm -f $(RULE30_BIN)
 	rm -f $(COMPARE_READ_BIN)
 	rm -f $(COMPARE_UINT64_BIN)
-	rm -f rule30-compare
+	rm -f misc/stdlib-rng
 	rm -f *.prof
 	rm -f *.test
 	rm -f *.bin
@@ -94,7 +94,7 @@ deps:
 
 # Test randomness with ent - compares all three RNGs
 test-entropy: rule30
-	@./test-entropy.sh
+	@./misc/test-entropy.sh
 
 # Quick smoke test
 smoke: rule30

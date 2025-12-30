@@ -19,7 +19,7 @@ Rule 30 RND generates pseudo-random numbers using a 1D cellular automaton (Rule 
 
 |Algorithm       |     Read32KB |      Read1KB |       Uint64|
 |----------------|--------------|--------------|-------------|
-|athRand        |  21468.00 ns |    651.10 ns |      1.78 ns|
+|MathRand        |  21468.00 ns |    651.10 ns |      1.78 ns|
 |MathRandV2      |  12693.00 ns |    400.00 ns |      3.06 ns|
 |Rule30          |   3922.00 ns |    127.00 ns |      1.28 ns|
 |CryptoRand      |   6895.00 ns |    371.80 ns |     53.04 ns|
