@@ -42,8 +42,11 @@ Examples:
   # Use specific seed
   rule30 --seed 12345 --bytes 1048576 > random.bin
 
-  # Unlimited generation (pipe to dd, pv, etc.)
-  rule30 --bytes 0 | dd of=test.data bs=1M count=1234
+  # Generate specific size with dd (piping, not using dd count)
+  rule30 --bytes 1073741824 | dd of=test.data bs=1m
+
+  # Unlimited streaming (use with head, pv, or Ctrl+C)
+  rule30 --bytes 0 | head -c 1073741824 > test.data
 
   # Benchmark throughput
   rule30 --benchmark
@@ -100,10 +103,16 @@ func generateBytesRule30(seed uint64, count int) {
 				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 				os.Exit(1)
 			}
-			_, err = os.Stdout.Write(buf[:n])
-			if err != nil {
-				// Pipe closed (e.g., dd finished) - exit gracefully
-				os.Exit(0)
+
+			// Write all bytes, handling partial writes
+			written := 0
+			for written < n {
+				w, err := os.Stdout.Write(buf[written:n])
+				if err != nil {
+					// Pipe closed (e.g., dd finished) - exit gracefully
+					os.Exit(0)
+				}
+				written += w
 			}
 		}
 	} else {
@@ -127,14 +136,19 @@ func generateBytesRule30(seed uint64, count int) {
 				os.Exit(1)
 			}
 
-			written, err := os.Stdout.Write(buf[:n])
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error writing: %v\n", err)
-				os.Exit(1)
+			// Write all bytes from this read, handling partial writes
+			written := 0
+			for written < n {
+				w, err := os.Stdout.Write(buf[written:n])
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error writing: %v\n", err)
+					os.Exit(1)
+				}
+				written += w
 			}
 
-			totalWritten += written
-			remaining -= written
+			totalWritten += n
+			remaining -= n
 		}
 
 		fmt.Fprintf(os.Stderr, "Generated %d bytes\n", totalWritten)
