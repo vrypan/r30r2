@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/vrypan/rule30rnd/rule30"
+	"github.com/vrypan/rule30rnd/rand"
 )
 
 func mainRule30() {
@@ -18,13 +18,13 @@ func mainRule30() {
 	)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `Rule 30 RNG - Random Number Generator using Rule 30 Cellular Automaton
+		fmt.Fprintf(os.Stderr, `Rule 30 RND - Random Number Generator using Rule 30 Cellular Automaton
 
 A deterministic RNG based on 1D cellular automata (Rule 30).
 Uses a circular 256-bit strip with Rule 30 evolution rules.
 
 Usage:
-  rule30-rng [options]
+  rule30 [options]
 
 Seed Format:
   64-bit seed initializes the 256-bit circular strip state
@@ -37,16 +37,16 @@ Options:
 
 Examples:
   # Generate 1KB of random data
-  rule30-rng --bytes 1024 > random.bin
+  rule30 --bytes 1024 > random.bin
 
   # Use specific seed
-  rule30-rng --seed 12345 --bytes 1048576 > random.bin
+  rule30 --seed 12345 --bytes 1048576 > random.bin
 
   # Benchmark throughput
-  rule30-rng --benchmark
+  rule30 --benchmark
 
   # Test randomness with ent
-  rule30-rng --bytes 1048576 | ent
+  rule30 --bytes 1048576 | ent
 
 Rule 30:
   A 1D cellular automaton where each cell evolves based on itself
@@ -79,7 +79,7 @@ Rule 30:
 
 // generateBytesRule30 generates and writes random bytes to stdout
 func generateBytesRule30(seed uint64, count int) {
-	rng := rule30.New(seed)
+	rng := rand.New(seed)
 
 	fmt.Fprintf(os.Stderr, "Rule 30 RNG initialized\n")
 	fmt.Fprintf(os.Stderr, "  Seed: 0x%016X (%d)\n", seed, seed)
@@ -107,7 +107,7 @@ func generateBytesRule30(seed uint64, count int) {
 
 // runBenchmarkRule30 measures RNG throughput
 func runBenchmarkRule30(seed uint64) {
-	rng := rule30.New(seed)
+	rng := rand.New(seed)
 
 	sizes := []int{1024, 10240, 102400, 1048576} // 1KB, 10KB, 100KB, 1MB
 

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/vrypan/rule30rnd/rule30"
+	"github.com/vrypan/rule30rnd/rand"
 )
 
 // Estimate π using Monte Carlo method
-func estimatePi(rng *rule30.RNG, samples int) float64 {
+func estimatePi(rng *rand.RNG, samples int) float64 {
 	inside := 0
 
 	for i := 0; i < samples; i++ {
@@ -26,7 +26,7 @@ func estimatePi(rng *rule30.RNG, samples int) float64 {
 }
 
 func main() {
-	rng := rule30.New(42)
+	rng := rand.New(42)
 
 	fmt.Println("Monte Carlo π Estimation using Rule 30 RNG")
 	fmt.Println("==========================================")

@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/vrypan/rule30rnd/rule30"
+	"github.com/vrypan/rule30rnd/rand"
 )
 
 func main() {
 	// Create a new Rule 30 RNG with a seed
-	rng := rule30.New(12345)
+	rng := rand.New(12345)
 
 	fmt.Println("Rule 30 RNG - Basic Usage Example")
 	fmt.Println("==================================")

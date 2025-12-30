@@ -7,7 +7,7 @@ import (
 	mathrand "math/rand"
 	"time"
 
-	"github.com/vrypan/rule30rnd/rule30"
+	"github.com/vrypan/rule30rnd/rand"
 )
 
 // BenchResult holds benchmark results
@@ -73,7 +73,7 @@ func main() {
 		fmt.Printf("Testing %s...\n", formatCalls(calls))
 
 		// Rule30RNG
-		rule30rng := rule30.New(12345)
+		rule30rng := rand.New(12345)
 		result := runUint64Benchmark("Rule30RNG", calls, rule30rng.Uint64)
 		results["Rule30RNG"][calls] = result
 		fmt.Printf("  ✓ Rule30RNG:   %6.1f ns/call\n", result.nsPerCall)

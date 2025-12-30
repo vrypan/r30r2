@@ -1,4 +1,4 @@
-package rule30
+package rand
 
 import (
 	cryptorand "crypto/rand"

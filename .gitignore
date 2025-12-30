@@ -1,5 +1,5 @@
 # Binaries
-rule30-rng
+rule30
 rule30-compare
 stdlib-rng
 test-interface

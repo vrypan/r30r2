@@ -34,8 +34,8 @@ if ! command -v ent &> /dev/null; then
 fi
 
 # Build binaries if needed
-if [ ! -f ./rule30-rng ]; then
-    echo "Building rule30-rng..."
+if [ ! -f ./rule30 ]; then
+    echo "Building rule30..."
     make rule30 > /dev/null 2>&1
 fi
 
@@ -75,7 +75,7 @@ for i in "${!SIZES[@]}"; do
     MATH_FILE="$TMP_DIR/math_${LABEL}.bin"
     CRYPTO_FILE="$TMP_DIR/crypto_${LABEL}.bin"
 
-    ./rule30-rng --seed=$SEED --bytes=$BYTES > "$RULE30_FILE" 2>/dev/null
+    ./rule30 --seed=$SEED --bytes=$BYTES > "$RULE30_FILE" 2>/dev/null
     ./stdlib-rng --type=math --seed=$SEED --bytes=$BYTES > "$MATH_FILE" 2>/dev/null
     ./stdlib-rng --type=crypto --bytes=$BYTES > "$CRYPTO_FILE" 2>/dev/null
 

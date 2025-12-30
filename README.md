@@ -39,7 +39,7 @@ Use the `ent` tool to analyze randomness:
 
 ```bash
 # Generate test data
-./rule30-rng --bytes=10485760 > test.bin
+./rule30 --bytes=10485760 > test.bin
 
 # Analyze with ent
 ent test.bin
@@ -80,7 +80,7 @@ go get github.com/vrypan/rule30rnd
 Import in your code:
 
 ```go
-import "github.com/vrypan/rule30rnd/rule30"
+import "github.com/vrypan/rule30rnd/rand"
 ```
 
 ## Usage
@@ -91,13 +91,13 @@ Generate random bytes:
 
 ```bash
 # Generate 1MB of random data
-./rule30-rng --bytes=1048576 > random.bin
+./rule30 --bytes=1048576 > random.bin
 
 # Use specific seed for reproducibility
-./rule30-rng --seed=12345 --bytes=1024 > random.bin
+./rule30 --seed=12345 --bytes=1024 > random.bin
 
 # Benchmark throughput
-./rule30-rng --benchmark
+./rule30 --benchmark
 ```
 
 ### Using the Library
@@ -109,12 +109,12 @@ package main
 
 import (
     "fmt"
-    "github.com/vrypan/rule30rnd/rule30"
+    "github.com/vrypan/rule30rnd/rand"
 )
 
 func main() {
     // Create RNG with seed
-    rng := rule30.New(12345)
+    rng := rand.New(12345)
 
     // Compatible with math/rand interface
     fmt.Printf("Uint32:    %d\n", rng.Uint32())

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/vrypan/rule30rnd/rule30"
+	"github.com/vrypan/rule30rnd/rand"
 )
 
 func main() {
@@ -12,7 +12,7 @@ func main() {
 	fmt.Println("====================================================")
 	fmt.Println()
 
-	rng := rule30.New(12345)
+	rng := rand.New(12345)
 
 	// Test Uint32/Uint64
 	fmt.Println("Basic integer generation:")

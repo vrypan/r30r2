@@ -3,7 +3,7 @@
 
 # Run benchmarks and capture output
 echo "Running benchmarks..."
-BENCH_OUTPUT=$(go test -bench=. -benchmem ./rule30/ 2>&1)
+BENCH_OUTPUT=$(go test -bench=. -benchmem ./rand/ 2>&1)
 
 # Check if benchmarks ran successfully
 if [ $? -ne 0 ]; then

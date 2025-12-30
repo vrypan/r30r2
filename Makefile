@@ -1,7 +1,7 @@
 # Rule 30 RNG Makefile
 
 # Binary names
-RULE30_BIN = rule30-rng
+RULE30_BIN = rule30
 COMPARE_READ_BIN = compare-read
 COMPARE_UINT64_BIN = compare-uint64
 
@@ -111,7 +111,7 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  all            Build all binaries (default)"
-	@echo "  rule30         Build rule30-rng CLI tool"
+	@echo "  rule30         Build rule30 CLI tool"
 	@echo "  compare        Build comparison tools (read + uint64)"
 	@echo "  compare-read   Build compare-read tool (MB/s benchmark)"
 	@echo "  compare-uint64 Build compare-uint64 tool (ns/call benchmark)"
