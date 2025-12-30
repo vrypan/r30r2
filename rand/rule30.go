@@ -3,6 +3,7 @@ package rand
 import (
 	"encoding/binary"
 	"math"
+	"math/bits"
 )
 
 // RNG implements a 1D cellular automaton (Rule 30) on a circular 256-bit strip
@@ -59,11 +60,11 @@ func (r *RNG) Step() {
 	right3 := (s3 << 1) | (s0 >> 63)
 	new3 := left3 ^ (s3 | right3)
 
-	// Update state
-	r.state[0] = new0
-	r.state[1] = new1
-	r.state[2] = new2
-	r.state[3] = new3
+	// Update state with XOR rotation mixing (use primes for good diffusion)
+	r.state[0] = new0 ^ bits.RotateLeft64(s0, 13)
+	r.state[1] = new1 ^ bits.RotateLeft64(s1, 17)
+	r.state[2] = new2 ^ bits.RotateLeft64(s2, 23)
+	r.state[3] = new3 ^ bits.RotateLeft64(s3, 29)
 }
 
 // Read implements io.Reader interface
