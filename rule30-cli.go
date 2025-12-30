@@ -31,7 +31,7 @@ Seed Format:
 
 Options:
   --seed N        Seed value (default: current time)
-  --bytes N       Number of bytes to generate (default: 1024)
+  --bytes N       Number of bytes to generate (default: 1024, 0 = unlimited)
   --benchmark     Benchmark throughput instead of generating output
   --help          Show this help
 
@@ -41,6 +41,9 @@ Examples:
 
   # Use specific seed
   rule30 --seed 12345 --bytes 1048576 > random.bin
+
+  # Unlimited generation (pipe to dd, pv, etc.)
+  rule30 --bytes 0 | dd of=test.data bs=1M count=1234
 
   # Benchmark throughput
   rule30 --benchmark
@@ -86,23 +89,56 @@ func generateBytesRule30(seed uint64, count int) {
 	fmt.Fprintf(os.Stderr, "  Strip: 256-bit circular\n")
 	fmt.Fprintf(os.Stderr, "  Rule: 30 (left XOR (center OR right))\n")
 	fmt.Fprintf(os.Stderr, "  Output: 32 bytes per iteration\n")
-	fmt.Fprintf(os.Stderr, "Generating %d bytes...\n", count)
 
-	buf := make([]byte, count)
-	n, err := rng.Read(buf)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+	if count == 0 {
+		fmt.Fprintf(os.Stderr, "Generating unlimited bytes (streaming mode)...\n")
+		// Unlimited mode: stream chunks until pipe breaks
+		buf := make([]byte, 1024*1024) // 1MB chunks
+		for {
+			n, err := rng.Read(buf)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
+			}
+			_, err = os.Stdout.Write(buf[:n])
+			if err != nil {
+				// Pipe closed (e.g., dd finished) - exit gracefully
+				os.Exit(0)
+			}
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "Generating %d bytes...\n", count)
+
+		// Fixed size: stream in chunks to avoid huge allocations
+		const chunkSize = 1024 * 1024 // 1MB chunks
+		buf := make([]byte, chunkSize)
+		remaining := count
+		totalWritten := 0
+
+		for remaining > 0 {
+			toRead := chunkSize
+			if remaining < chunkSize {
+				toRead = remaining
+			}
+
+			n, err := rng.Read(buf[:toRead])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
+			}
+
+			written, err := os.Stdout.Write(buf[:n])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error writing: %v\n", err)
+				os.Exit(1)
+			}
+
+			totalWritten += written
+			remaining -= written
+		}
+
+		fmt.Fprintf(os.Stderr, "Generated %d bytes\n", totalWritten)
 	}
-
-	// Write to stdout
-	written, err := os.Stdout.Write(buf[:n])
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error writing: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Fprintf(os.Stderr, "Generated %d bytes\n", written)
 }
 
 // runBenchmarkRule30 measures RNG throughput
