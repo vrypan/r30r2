@@ -4,6 +4,7 @@
 RULE30_BIN = rule30
 COMPARE_READ_BIN = misc/compare-read
 COMPARE_UINT64_BIN = misc/compare-uint64
+VISUALIZE_BIN = misc/visualize-rule30
 
 # Go parameters
 GOCMD = go
@@ -20,8 +21,9 @@ BUILD_FLAGS = -ldflags "$(LDFLAGS)"
 RULE30_SOURCES = rule30-main.go rule30-cli.go
 COMPARE_READ_SOURCES = misc/compare-read.go
 COMPARE_UINT64_SOURCES = misc/compare-uint64.go
+VISUALIZE_SOURCES = misc/visualize-rule30.go
 
-.PHONY: all rule30 compare compare-read compare-uint64 clean fmt help compare-run test-entropy smoke deps bench
+.PHONY: all rule30 compare compare-read compare-uint64 visualize clean fmt help compare-run test-entropy smoke deps bench
 
 # Default target
 all: rule30 compare
@@ -53,6 +55,14 @@ $(COMPARE_UINT64_BIN): $(COMPARE_UINT64_SOURCES)
 	$(GOBUILD) $(BUILD_FLAGS) -o $(COMPARE_UINT64_BIN) $(COMPARE_UINT64_SOURCES)
 	@echo "✓ Built $(COMPARE_UINT64_BIN)"
 
+# Build the visualization tool
+visualize: $(VISUALIZE_BIN)
+
+$(VISUALIZE_BIN): $(VISUALIZE_SOURCES)
+	@echo "Building $(VISUALIZE_BIN)..."
+	$(GOBUILD) $(BUILD_FLAGS) -o $(VISUALIZE_BIN) $(VISUALIZE_SOURCES)
+	@echo "✓ Built $(VISUALIZE_BIN)"
+
 # Run comparison benchmarks
 compare-run: compare
 	@echo "Running Read() benchmark..."
@@ -78,6 +88,7 @@ clean:
 	rm -f $(RULE30_BIN)
 	rm -f $(COMPARE_READ_BIN)
 	rm -f $(COMPARE_UINT64_BIN)
+	rm -f $(VISUALIZE_BIN)
 	rm -f misc/stdlib-rng
 	rm -f *.prof
 	rm -f *.test
@@ -116,6 +127,7 @@ help:
 	@echo "  compare-read   Build compare-read tool (MB/s benchmark)"
 	@echo "  compare-uint64 Build compare-uint64 tool (ns/call benchmark)"
 	@echo "  compare-run    Run both comparison benchmarks"
+	@echo "  visualize      Build Rule 30 visualization tool"
 	@echo "  bench          Run go test benchmarks (table format)"
 	@echo "  fmt            Format code with gofmt"
 	@echo "  clean          Remove build artifacts"
