@@ -30,56 +30,56 @@ mathrandv2-gen: mathrandv2-gen.go
 # Run SmallCrush (quick test)
 smallcrush: test-smallcrush
 	@echo "Running SmallCrush test (approx 1-2 minutes)..."
-	@echo "Generating 500 MB of random data and piping to TestU01..."
-	@cd .. && ./rule30 --bytes=524288000 2>&1 | ./testu01/test-smallcrush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data and piping to TestU01..."
+	@cd .. && ./rule30 --bytes=0 2>/dev/null | ./testu01/test-smallcrush
 
 # Run Crush (medium test)
 crush: test-crush
 	@echo "Running Crush test (approx 1 hour)..."
-	@echo "Generating 2 GB of random data and piping to TestU01..."
-	@cd .. && ./rule30 --bytes=2147483648 2>&1 | ./testu01/test-crush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data and piping to TestU01..."
+	@cd .. && ./rule30 --bytes=0 2>/dev/null | ./testu01/test-crush
 
 # Run BigCrush (comprehensive test)
 bigcrush: test-bigcrush
 	@echo "Running BigCrush test (approx 8 hours)..."
-	@echo "Generating 10 GB of random data and piping to TestU01..."
-	@cd .. && ./rule30 --bytes=10737418240 2>&1 | ./testu01/test-bigcrush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data and piping to TestU01..."
+	@cd .. && ./rule30 --bytes=0 2>/dev/null | ./testu01/test-bigcrush
 
 # Run SmallCrush with math/rand (comparison)
 mathrand-smallcrush: test-smallcrush mathrand-gen
 	@echo "Running SmallCrush test with math/rand (approx 1-2 minutes)..."
-	@echo "Generating 500 MB of random data from math/rand..."
-	@./mathrand-gen --bytes=524288000 2>&1 | ./test-smallcrush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data from math/rand..."
+	@./mathrand-gen --bytes=0 2>/dev/null | ./test-smallcrush
 
 # Run Crush with math/rand
 mathrand-crush: test-crush mathrand-gen
 	@echo "Running Crush test with math/rand (approx 1 hour)..."
-	@echo "Generating 2 GB of random data from math/rand..."
-	@./mathrand-gen --bytes=2147483648 2>&1 | ./test-crush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data from math/rand..."
+	@./mathrand-gen --bytes=0 2>/dev/null | ./test-crush
 
 # Run BigCrush with math/rand
 mathrand-bigcrush: test-bigcrush mathrand-gen
 	@echo "Running BigCrush test with math/rand (approx 8 hours)..."
-	@echo "Generating 10 GB of random data from math/rand..."
-	@./mathrand-gen --bytes=10737418240 2>&1 | ./test-bigcrush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data from math/rand..."
+	@./mathrand-gen --bytes=0 2>/dev/null | ./test-bigcrush
 
 # Run SmallCrush with math/rand/v2 (comparison)
 mathrandv2-smallcrush: test-smallcrush mathrandv2-gen
 	@echo "Running SmallCrush test with math/rand/v2 (approx 1-2 minutes)..."
-	@echo "Generating 500 MB of random data from math/rand/v2..."
-	@./mathrandv2-gen --bytes=524288000 2>&1 | ./test-smallcrush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data from math/rand/v2..."
+	@./mathrandv2-gen --bytes=0 2>/dev/null | ./test-smallcrush
 
 # Run Crush with math/rand/v2
 mathrandv2-crush: test-crush mathrandv2-gen
 	@echo "Running Crush test with math/rand/v2 (approx 1 hour)..."
-	@echo "Generating 2 GB of random data from math/rand/v2..."
-	@./mathrandv2-gen --bytes=2147483648 2>&1 | ./test-crush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data from math/rand/v2..."
+	@./mathrandv2-gen --bytes=0 2>/dev/null | ./test-crush
 
 # Run BigCrush with math/rand/v2
 mathrandv2-bigcrush: test-bigcrush mathrandv2-gen
 	@echo "Running BigCrush test with math/rand/v2 (approx 8 hours)..."
-	@echo "Generating 10 GB of random data from math/rand/v2..."
-	@./mathrandv2-gen --bytes=10737418240 2>&1 | ./test-bigcrush 2>&1 | grep -v "Error: Failed"
+	@echo "Generating unlimited random data from math/rand/v2..."
+	@./mathrandv2-gen --bytes=0 2>/dev/null | ./test-bigcrush
 
 clean:
 	rm -f $(TARGETS)
