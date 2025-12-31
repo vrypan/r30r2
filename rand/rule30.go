@@ -67,32 +67,38 @@ func (r *RNG) step() {
 	r.state[3] = new3 ^ bits.RotateLeft64(s3, 29)
 }
 
+// Uint64 returns a random uint64
+// Optimized to extract directly from state without byte conversion
+func (r *RNG) Uint64() uint64 {
+	// Generate new state if we've exhausted all 4 uint64 values
+	if r.pos >= 4 {
+		r.step()
+		r.pos = 0
+	}
+
+	// Extract uint64 directly from state
+	val := r.state[r.pos]
+	r.pos++
+	return val
+}
+
 // Read implements io.Reader interface
-// Reads in 8-byte (uint64) chunks. Each Step() generates 32 bytes (4 uint64s),
-// so every 4 Read() calls of 8 bytes fully utilizes one Step() with no waste.
+// Reads in 8-byte (uint64) chunks. Each step() generates 32 bytes (4 uint64s),
+// so every 4 Read() calls of 8 bytes fully utilizes one step() with no waste.
 func (r *RNG) Read(buf []byte) (n int, err error) {
 	i := 0
 	limit := len(buf)
 
 	// Fill full uint64 chunks directly into the destination buffer
 	for limit-i >= 8 {
-		if r.pos >= 4 {
-			r.step()
-			r.pos = 0
-		}
-		binary.LittleEndian.PutUint64(buf[i:], r.state[r.pos])
-		r.pos++
+		val := r.Uint64()
+		binary.LittleEndian.PutUint64(buf[i:], val)
 		i += 8
 	}
 
-	// Handle the remaining tail bytes, if any, without creating a temporary buffer
+	// Handle the remaining tail bytes, if any
 	if rem := limit - i; rem > 0 {
-		if r.pos >= 4 {
-			r.step()
-			r.pos = 0
-		}
-		val := r.state[r.pos]
-		r.pos++
+		val := r.Uint64()
 		for j := 0; j < rem; j++ {
 			buf[i+j] = byte(val)
 			val >>= 8
@@ -110,21 +116,6 @@ func (r *RNG) CopyState() [4]uint64 {
 // Uint32 returns a random uint32
 func (r *RNG) Uint32() uint32 {
 	return uint32(r.Uint64())
-}
-
-// Uint64 returns a random uint64
-// Optimized to extract directly from state without byte conversion
-func (r *RNG) Uint64() uint64 {
-	// Generate new state if we've exhausted all 4 uint64 values
-	if r.pos >= 4 {
-		r.step()
-		r.pos = 0
-	}
-
-	// Extract uint64 directly from state
-	val := r.state[r.pos]
-	r.pos++
-	return val
 }
 
 // Int63 returns a non-negative random int64 (0 to 2^63-1)
