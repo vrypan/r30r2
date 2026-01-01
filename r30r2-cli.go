@@ -87,14 +87,7 @@ R30R2:
 func generateBytesR30R2(seed uint64, count int) {
 	rng := rand.New(seed)
 
-	fmt.Fprintf(os.Stderr, "R30R2 RNG initialized\n")
-	fmt.Fprintf(os.Stderr, "  Seed: 0x%016X (%d)\n", seed, seed)
-	fmt.Fprintf(os.Stderr, "  Strip: 256-bit circular\n")
-	fmt.Fprintf(os.Stderr, "  Rule: Radius-2 Rule 30\n")
-	fmt.Fprintf(os.Stderr, "  Output: 32 bytes per iteration\n")
-
 	if count == 0 {
-		fmt.Fprintf(os.Stderr, "Generating unlimited bytes (streaming mode)...\n")
 		// Unlimited mode: stream chunks until pipe breaks
 		buf := make([]byte, 1024*1024) // 1MB chunks
 		for {
@@ -116,8 +109,6 @@ func generateBytesR30R2(seed uint64, count int) {
 			}
 		}
 	} else {
-		fmt.Fprintf(os.Stderr, "Generating %d bytes...\n", count)
-
 		// Fixed size: stream in chunks to avoid huge allocations
 		const chunkSize = 1024 * 1024 // 1MB chunks
 		buf := make([]byte, chunkSize)
@@ -150,8 +141,6 @@ func generateBytesR30R2(seed uint64, count int) {
 			totalWritten += n
 			remaining -= n
 		}
-
-		fmt.Fprintf(os.Stderr, "Generated %d bytes\n", totalWritten)
 	}
 }
 

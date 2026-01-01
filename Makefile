@@ -23,7 +23,7 @@ COMPARE_READ_SOURCES = misc/compare-read.go rand/r30r2.go
 COMPARE_UINT64_SOURCES = misc/compare-uint64.go rand/r30r2.go
 VISUALIZE_SOURCES = misc/visualize-r30r2.go rand/r30r2.go
 
-.PHONY: all compare clean fmt help compare-run test-entropy smoke deps bench
+.PHONY: all compare visualize clean fmt help compare-run test-entropy smoke deps bench
 
 # Default target
 all: $(R30R2_BIN) compare
@@ -54,6 +54,9 @@ $(VISUALIZE_BIN): $(VISUALIZE_SOURCES)
 	@echo "Building $(VISUALIZE_BIN)..."
 	$(GOBUILD) $(BUILD_FLAGS) -o $(VISUALIZE_BIN) misc/visualize-r30r2.go
 	@echo "✓ Built $(VISUALIZE_BIN)"
+
+# Convenience alias for building visualization tool
+visualize: $(VISUALIZE_BIN)
 
 # Run comparison benchmarks
 compare-run: compare
