@@ -33,11 +33,11 @@ Shows how the estimate converges as sample size increases.
 In your own projects:
 
 ```go
-import "github.com/vrypan/rule30rnd/rand"
+import "github.com/vrypan/r30r2/rand"
 ```
 
 Then install the dependency:
 
 ```bash
-go get github.com/vrypan/rule30rnd
+go get github.com/vrypan/r30r2
 ```

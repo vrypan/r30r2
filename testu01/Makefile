@@ -28,25 +28,25 @@ mathrandv2-gen: mathrandv2-gen.go
 	go build -o mathrandv2-gen mathrandv2-gen.go
 
 # Run SmallCrush (quick test)
-smallcrush: test-smallcrush ../rule30
+smallcrush: test-smallcrush ../r30r2
 	@echo "Running SmallCrush test (approx 1-2 minutes)..."
 	@echo "Generating unlimited random data and piping to TestU01..."
-	@cd .. && ./rule30 --bytes=0 2>/dev/null | ./testu01/test-smallcrush
+	@cd .. && ./r30r2 --bytes=0 2>/dev/null | ./testu01/test-smallcrush
 
 # Run Crush (medium test)
-crush: test-crush ../rule30
+crush: test-crush ../r30r2
 	@echo "Running Crush test (approx 1 hour)..."
 	@echo "Generating unlimited random data and piping to TestU01..."
-	@cd .. && ./rule30 --bytes=0 2>/dev/null | ./testu01/test-crush
+	@cd .. && ./r30r2 --bytes=0 2>/dev/null | ./testu01/test-crush
 
 # Run BigCrush (comprehensive test)
-bigcrush: test-bigcrush ../rule30
+bigcrush: test-bigcrush ../r30r2
 	@echo "Running BigCrush test (approx 8 hours)..."
 	@echo "Generating unlimited random data and piping to TestU01..."
-	@cd .. && ./rule30 --bytes=0 2>/dev/null | ./testu01/test-bigcrush
+	@cd .. && ./r30r2 --bytes=0 2>/dev/null | ./testu01/test-bigcrush
 
-# Build rule30 binary if needed
-../rule30:
+# Build r30r2 binary if needed
+../r30r2:
 	@cd .. && $(MAKE) $(notdir $@)
 
 # Run SmallCrush with math/rand (comparison)
@@ -91,12 +91,12 @@ clean:
 	rm -f *.o
 
 help:
-	@echo "TestU01 Tests for Rule30 RNG and math/rand comparison"
+	@echo "TestU01 Tests for R30R2 RNG and math/rand comparison"
 	@echo ""
-	@echo "Rule30 Targets:"
-	@echo "  smallcrush           Run SmallCrush with Rule30 (1-2 min)"
-	@echo "  crush                Run Crush with Rule30 (1 hour)"
-	@echo "  bigcrush             Run BigCrush with Rule30 (8 hours)"
+	@echo "R30R2 Targets:"
+	@echo "  smallcrush           Run SmallCrush with R30R2 (1-2 min)"
+	@echo "  crush                Run Crush with R30R2 (1 hour)"
+	@echo "  bigcrush             Run BigCrush with R30R2 (8 hours)"
 	@echo ""
 	@echo "math/rand Comparison Targets:"
 	@echo "  mathrand-smallcrush  Run SmallCrush with math/rand (1-2 min)"
@@ -113,6 +113,6 @@ help:
 	@echo "  clean                Remove built programs"
 	@echo ""
 	@echo "Example:"
-	@echo "  make smallcrush           # Test Rule30"
+	@echo "  make smallcrush           # Test R30R2"
 	@echo "  make mathrand-smallcrush  # Test math/rand for comparison"
 	@echo "  make mathrandv2-smallcrush # Test math/rand/v2 for comparison"

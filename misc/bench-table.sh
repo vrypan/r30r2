@@ -68,7 +68,7 @@ BEGIN {
 
 END {
     # Define desired order of RNGs
-    split("MathRand MathRandV2 Rule30 CryptoRand", ordered_rngs)
+    split("MathRand MathRandV2 R30R2 CryptoRand", ordered_rngs)
     ordered_count = 4
 
     # Print table header

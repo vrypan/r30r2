@@ -37,9 +37,9 @@ if ! command -v ent &> /dev/null; then
 fi
 
 # Build binaries if needed
-if [ ! -f ../rule30 ]; then
-    echo "Building rule30..."
-    cd .. && make rule30 > /dev/null 2>&1 && cd misc
+if [ ! -f ../r30r2 ]; then
+    echo "Building r30r2..."
+    cd .. && make r30r2 > /dev/null 2>&1 && cd misc
 fi
 
 if [ ! -f ./stdlib-rng ]; then
@@ -74,11 +74,11 @@ for i in "${!SIZES[@]}"; do
     echo "Testing $LABEL ($BYTES bytes)..."
 
     # Generate test files
-    RULE30_FILE="$TMP_DIR/rule30_${LABEL}.bin"
+    RULE30_FILE="$TMP_DIR/r30r2_${LABEL}.bin"
     MATH_FILE="$TMP_DIR/math_${LABEL}.bin"
     CRYPTO_FILE="$TMP_DIR/crypto_${LABEL}.bin"
 
-    ../rule30 --seed=$SEED --bytes=$BYTES > "$RULE30_FILE" 2>/dev/null
+    ../r30r2 --seed=$SEED --bytes=$BYTES > "$RULE30_FILE" 2>/dev/null
     ./stdlib-rng --type=math --seed=$SEED --bytes=$BYTES > "$MATH_FILE" 2>/dev/null
     ./stdlib-rng --type=crypto --bytes=$BYTES > "$CRYPTO_FILE" 2>/dev/null
 
@@ -118,7 +118,7 @@ done
 echo ""
 echo "────────────────┼────────────┼────────────┼────────────"
 
-printf "%-15s" "Rule30RNG"
+printf "%-15s" "R30R2RNG"
 for i in "${!SIZE_LABELS[@]}"; do
     printf " │ %10s" "${ENTROPY_RULE30[$i]}"
 done
@@ -149,7 +149,7 @@ done
 echo ""
 echo "────────────────┼────────────┼────────────┼────────────"
 
-printf "%-15s" "Rule30RNG"
+printf "%-15s" "R30R2RNG"
 for i in "${!SIZE_LABELS[@]}"; do
     printf " │ %10s" "${CHI_RULE30[$i]}"
 done
@@ -180,7 +180,7 @@ done
 echo ""
 echo "────────────────┼────────────┼────────────┼────────────"
 
-printf "%-15s" "Rule30RNG"
+printf "%-15s" "R30R2RNG"
 for i in "${!SIZE_LABELS[@]}"; do
     printf " │ %10s" "${MEAN_RULE30[$i]}"
 done
@@ -211,7 +211,7 @@ done
 echo ""
 echo "────────────────┼────────────┼────────────┼────────────"
 
-printf "%-15s" "Rule30RNG"
+printf "%-15s" "R30R2RNG"
 for i in "${!SIZE_LABELS[@]}"; do
     printf " │ %10s" "${PI_RULE30[$i]}"
 done
@@ -242,7 +242,7 @@ done
 echo ""
 echo "────────────────┼────────────┼────────────┼────────────"
 
-printf "%-15s" "Rule30RNG"
+printf "%-15s" "R30R2RNG"
 for i in "${!SIZE_LABELS[@]}"; do
     printf " │ %10s" "${CORR_RULE30[$i]}"
 done

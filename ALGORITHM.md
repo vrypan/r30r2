@@ -356,6 +356,6 @@ R30R2 with hybrid mixing has achieved perfect scores on the complete TestU01 sui
 
 ## Implementation
 
-Reference implementation: `rand/rule30.go`
+Reference implementation: `rand/r30r2.go`
 
 The production implementation processes all 256 bits in parallel using 64-bit word operations with fully unrolled loops for maximum performance.

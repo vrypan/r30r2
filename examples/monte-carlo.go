@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/vrypan/rule30rnd/rand"
+	"github.com/vrypan/r30r2/rand"
 )
 
 // Estimate π using Monte Carlo method

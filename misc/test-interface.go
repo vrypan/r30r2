@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/vrypan/rule30rnd/rand"
+	"github.com/vrypan/r30r2/rand"
 )
 
 func main() {
-	fmt.Println("Testing Rule30RNG math/rand interface compatibility")
+	fmt.Println("Testing R30R2 RNG math/rand interface compatibility")
 	fmt.Println("====================================================")
 	fmt.Println()
 

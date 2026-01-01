@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/vrypan/rule30rnd/rand"
+	"github.com/vrypan/r30r2/rand"
 )
 
 func main() {

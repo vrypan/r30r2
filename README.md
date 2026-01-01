@@ -1,4 +1,4 @@
-# Rule 30 RND
+# R30R2
 
 High-performance pseudo-random number generator based on Rule 30 cellular automaton. **Up to 3.86× faster** than Go's math/rand for bulk operations, with **equivalent statistical quality to math/rand/v2** - both pass all 160 BigCrush tests perfectly.
 
@@ -8,29 +8,29 @@ High-performance pseudo-random number generator based on Rule 30 cellular automa
 
 ```bash
 # As a command-line tool
-go install github.com/vrypan/rule30rnd@latest
+go install github.com/vrypan/r30r2@latest
 
 # As a library
-go get github.com/vrypan/rule30rnd
+go get github.com/vrypan/r30r2
 ```
 
 ### Command Line Usage
 
 ```bash
 # Generate random data
-./rule30 --bytes=1048576 > random.bin
+./r30r2 --bytes=1048576 > random.bin
 
 # Generate specific size with dd
-./rule30 --bytes=1073741824 | dd of=test.data bs=1m
+./r30r2 --bytes=1073741824 | dd of=test.data bs=1m
 
 # Unlimited streaming (use with head, pv, or Ctrl+C)
-./rule30 --bytes=0 | head -c 1073741824 > test.data
+./r30r2 --bytes=0 | head -c 1073741824 > test.data
 
 # Benchmark throughput
-./rule30 --benchmark
+./r30r2 --benchmark
 
 # Reproducible output with seed
-./rule30 --seed=12345 --bytes=1024 > random.bin
+./r30r2 --seed=12345 --bytes=1024 > random.bin
 ```
 
 ### Library Usage
@@ -38,7 +38,7 @@ go get github.com/vrypan/rule30rnd
 Drop-in replacement for math/rand:
 
 ```go
-import "github.com/vrypan/rule30rnd/rand"
+import "github.com/vrypan/r30r2/rand"
 
 rng := rand.New(12345)
 
@@ -65,7 +65,7 @@ Benchmarks on Apple M4, verified 2026-01-01 (run `make bench` to reproduce):
 |----------------|--------------|--------------|-------------|
 |MathRand        |  21316.00 ns |    674.30 ns |      1.81 ns|
 |MathRandV2      |  13369.00 ns |    423.50 ns |      3.22 ns|
-|**Rule30**      |   **5516.00 ns** |    **183.90 ns** |      **1.75 ns**|
+|**R30R2**      |   **5516.00 ns** |    **183.90 ns** |      **1.75 ns**|
 |CryptoRand      |   7009.00 ns |    367.90 ns |     56.29 ns|
 
 **Relative to math/rand:**
@@ -74,14 +74,14 @@ Benchmarks on Apple M4, verified 2026-01-01 (run `make bench` to reproduce):
 |----------------|-------------|-------------|------------|
 |MathRand        |       1.00x |       1.00x |       1.00x|
 |MathRandV2      |       1.59x |       1.59x |       0.56x|
-|**Rule30**      |    *3.86x** |   **3.67x** |   **1.03x**|
+|**R30R2**      |    *3.86x** |   **3.67x** |   **1.03x**|
 |CryptoRand      |       3.04x |       1.83x |       0.03x|
 
 ## Randomness Quality
 
 **Perfect scores on complete TestU01 test suite** - exceptional statistical quality verified through rigorous testing:
 
-| Test Battery | Tests | Rule30 | Pass Rate | Status |
+| Test Battery | Tests | R30R2 | Pass Rate | Status |
 |--------------|-------|--------|-----------|------|
 | **SmallCrush** | 15 | **15/15** ✓ | **100%** | ✅ Verified 2026-01-01 |
 | **Crush** | 144 | **144/144** ✓ | **100%**  | ✅ Verified 2026-01-01 |

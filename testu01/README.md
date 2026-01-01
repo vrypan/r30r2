@@ -1,6 +1,6 @@
-# TestU01 Statistical Tests for Rule30 RNG
+# TestU01 Statistical Tests for R30R2 RNG
 
-This directory contains setup and programs for testing Rule30 RNG with TestU01, a comprehensive statistical test suite.
+This directory contains setup and programs for testing R30R2 RNG with TestU01, a comprehensive statistical test suite.
 
 ## Installation
 
@@ -79,7 +79,7 @@ make bigcrush
 - `test-crush.c` - Runs Crush battery (96 tests)
 - `test-bigcrush.c` - Runs BigCrush battery (106 tests)
 
-All programs read random data from the Rule30 RNG via a pipe.
+All programs read random data from the R30R2 RNG via a pipe.
 
 ## Understanding Results
 

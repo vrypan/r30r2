@@ -8,7 +8,7 @@ import (
 	mathrandv2 "math/rand/v2"
 	"time"
 
-	"github.com/vrypan/rule30rnd/rand"
+	"github.com/vrypan/r30r2/rand"
 )
 
 // BenchResult holds benchmark results
@@ -58,7 +58,7 @@ func main() {
 
 	// Store results by RNG type and call count
 	results := make(map[string]map[int]BenchResult)
-	results["Rule30RNG"] = make(map[int]BenchResult)
+	results["R30R2RNG"] = make(map[int]BenchResult)
 	results["math/rand"] = make(map[int]BenchResult)
 	results["math/rand/v2"] = make(map[int]BenchResult)
 	results["crypto/rand"] = make(map[int]BenchResult)
@@ -74,11 +74,11 @@ func main() {
 	for _, calls := range callCounts {
 		fmt.Printf("Testing %s...\n", formatCalls(calls))
 
-		// Rule30RNG
+		// R30R2RNG
 		rule30rng := rand.New(12345)
-		result := runUint64Benchmark("Rule30RNG", calls, rule30rng.Uint64)
-		results["Rule30RNG"][calls] = result
-		fmt.Printf("  ✓ Rule30RNG:   %6.1f ns/call\n", result.nsPerCall)
+		result := runUint64Benchmark("R30R2RNG", calls, rule30rng.Uint64)
+		results["R30R2RNG"][calls] = result
+		fmt.Printf("  ✓ R30R2RNG:   %6.1f ns/call\n", result.nsPerCall)
 
 		// math/rand
 		mathRng := mathrand.New(mathrand.NewSource(12345))
@@ -110,9 +110,9 @@ func main() {
 	fmt.Printf("%-15s │ %-12s │ %-10s\n", "RNG", "10M ns/call", "Relative")
 	fmt.Println("────────────────┼──────────────┼────────────")
 
-	// Table rows with Rule30RNG as baseline
-	rngNames := []string{"Rule30RNG", "math/rand", "math/rand/v2", "crypto/rand"}
-	baseline := results["Rule30RNG"][callCounts[0]].nsPerCall
+	// Table rows with R30R2RNG as baseline
+	rngNames := []string{"R30R2RNG", "math/rand", "math/rand/v2", "crypto/rand"}
+	baseline := results["R30R2RNG"][callCounts[0]].nsPerCall
 	for _, rngName := range rngNames {
 		result := results[rngName][callCounts[0]]
 		relative := result.nsPerCall / baseline
@@ -125,7 +125,7 @@ func main() {
 
 	// Additional info
 	fmt.Println("Notes:")
-	fmt.Println("  • Rule30RNG:    1D CA (Rule 30), 256-bit state, deterministic")
+	fmt.Println("  • R30R2RNG:    1D CA (Rule 30), 256-bit state, deterministic")
 	fmt.Println("  • math/rand:    Legacy PRNG (LFSR), deterministic")
 	fmt.Println("  • math/rand/v2: Modern PRNG (PCG), deterministic")
 	fmt.Println("  • crypto/rand:  Hardware-accelerated CSPRNG")

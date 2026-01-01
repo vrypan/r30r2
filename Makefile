@@ -1,10 +1,10 @@
-# Rule 30 RNG Makefile
+# R30R2 RNG Makefile
 
 # Binary names
-RULE30_BIN = rule30
+R30R2_BIN = r30r2
 COMPARE_READ_BIN = misc/compare-read
 COMPARE_UINT64_BIN = misc/compare-uint64
-VISUALIZE_BIN = misc/visualize-rule30
+VISUALIZE_BIN = misc/visualize-r30r2
 
 # Go parameters
 GOCMD = go
@@ -18,21 +18,21 @@ LDFLAGS = -s -w
 BUILD_FLAGS = -ldflags "$(LDFLAGS)"
 
 # Source files for dependency tracking
-RULE30_SOURCES = rule30-main.go rule30-cli.go rand/rule30.go
-COMPARE_READ_SOURCES = misc/compare-read.go rand/rule30.go
-COMPARE_UINT64_SOURCES = misc/compare-uint64.go rand/rule30.go
-VISUALIZE_SOURCES = misc/visualize-rule30.go rand/rule30.go
+R30R2_SOURCES = r30r2-main.go r30r2-cli.go rand/r30r2.go
+COMPARE_READ_SOURCES = misc/compare-read.go rand/r30r2.go
+COMPARE_UINT64_SOURCES = misc/compare-uint64.go rand/r30r2.go
+VISUALIZE_SOURCES = misc/visualize-r30r2.go rand/r30r2.go
 
 .PHONY: all compare clean fmt help compare-run test-entropy smoke deps bench
 
 # Default target
-all: $(RULE30_BIN) compare
+all: $(R30R2_BIN) compare
 
-# Build the Rule 30 CLI tool
-$(RULE30_BIN): $(RULE30_SOURCES)
-	@echo "Building $(RULE30_BIN)..."
-	$(GOBUILD) $(BUILD_FLAGS) -o $(RULE30_BIN) rule30-main.go rule30-cli.go
-	@echo "✓ Built $(RULE30_BIN)"
+# Build the R30R2 CLI tool
+$(R30R2_BIN): $(R30R2_SOURCES)
+	@echo "Building $(R30R2_BIN)..."
+	$(GOBUILD) $(BUILD_FLAGS) -o $(R30R2_BIN) r30r2-main.go r30r2-cli.go
+	@echo "✓ Built $(R30R2_BIN)"
 
 # Build both comparison tools
 compare: $(COMPARE_READ_BIN) $(COMPARE_UINT64_BIN)
@@ -52,7 +52,7 @@ $(COMPARE_UINT64_BIN): $(COMPARE_UINT64_SOURCES)
 # Build the visualization tool
 $(VISUALIZE_BIN): $(VISUALIZE_SOURCES)
 	@echo "Building $(VISUALIZE_BIN)..."
-	$(GOBUILD) $(BUILD_FLAGS) -o $(VISUALIZE_BIN) misc/visualize-rule30.go
+	$(GOBUILD) $(BUILD_FLAGS) -o $(VISUALIZE_BIN) misc/visualize-r30r2.go
 	@echo "✓ Built $(VISUALIZE_BIN)"
 
 # Run comparison benchmarks
@@ -77,7 +77,7 @@ fmt:
 clean:
 	@echo "Cleaning..."
 	$(GOCLEAN)
-	rm -f $(RULE30_BIN)
+	rm -f $(R30R2_BIN)
 	rm -f $(COMPARE_READ_BIN)
 	rm -f $(COMPARE_UINT64_BIN)
 	rm -f $(VISUALIZE_BIN)
@@ -96,30 +96,30 @@ deps:
 	@echo "✓ Dependencies updated"
 
 # Test randomness with ent - compares all three RNGs
-test-entropy: rule30
+test-entropy: r30r2
 	@./misc/test-entropy.sh
 
 # Quick smoke test
-smoke: rule30
+smoke: r30r2
 	@echo "Running smoke test..."
-	@./$(RULE30_BIN) --seed=12345 --bytes=1024 > /dev/null
+	@./$(R30R2_BIN) --seed=12345 --bytes=1024 > /dev/null
 	@echo "✓ Smoke test passed"
 
 # Show help
 help:
-	@echo "Rule 30 RNG Makefile"
+	@echo "R30R2 RNG Makefile"
 	@echo ""
 	@echo "Usage:"
 	@echo "  make [target]"
 	@echo ""
 	@echo "Targets:"
 	@echo "  all            Build all binaries (default)"
-	@echo "  rule30         Build rule30 CLI tool"
+	@echo "  r30r2          Build r30r2 CLI tool"
 	@echo "  compare        Build comparison tools (read + uint64)"
 	@echo "  compare-read   Build compare-read tool (MB/s benchmark)"
 	@echo "  compare-uint64 Build compare-uint64 tool (ns/call benchmark)"
 	@echo "  compare-run    Run both comparison benchmarks"
-	@echo "  visualize      Build Rule 30 visualization tool"
+	@echo "  visualize      Build R30R2 visualization tool"
 	@echo "  bench          Run go test benchmarks (table format)"
 	@echo "  fmt            Format code with gofmt"
 	@echo "  clean          Remove build artifacts"
@@ -129,7 +129,7 @@ help:
 	@echo "  help           Show this help message"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make rule30"
+	@echo "  make r30r2"
 	@echo "  make compare-run"
 	@echo "  make test-entropy"
-	@echo "  make clean rule30"
+	@echo "  make clean r30r2"

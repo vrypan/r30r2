@@ -1,5 +1,5 @@
 #!/bin/bash
-# Compare Rule30 RNG vs /dev/urandom throughput using dd
+# Compare R30R2 RNG vs /dev/urandom throughput using dd
 # Both sources pipe to dd for fair comparison
 
 set -e
@@ -8,14 +8,14 @@ set -e
 cd "$(dirname "$0")"
 cd ..
 
-# Build rule30 if needed
-if [ ! -f ./rule30 ]; then
-    echo "Building rule30..."
-    make rule30 > /dev/null 2>&1
+# Build r30r2 if needed
+if [ ! -f ./r30r2 ]; then
+    echo "Building r30r2..."
+    make r30r2 > /dev/null 2>&1
 fi
 
 echo "═══════════════════════════════════════════════════════════"
-echo "  Rule30 vs /dev/urandom - Throughput Comparison (dd)"
+echo "  R30R2 vs /dev/urandom - Throughput Comparison (dd)"
 echo "═══════════════════════════════════════════════════════════"
 echo ""
 
@@ -34,9 +34,9 @@ for i in "${!SIZES_MB[@]}"; do
 
     echo "Testing $LABEL..."
 
-    # Test Rule30 (fixed bytes mode piped to dd)
+    # Test R30R2 (fixed bytes mode piped to dd)
     START=$(date +%s.%N)
-    ./rule30 --bytes=$SIZE_BYTES 2>/dev/null | dd of=/dev/null bs=1m 2>/dev/null
+    ./r30r2 --bytes=$SIZE_BYTES 2>/dev/null | dd of=/dev/null bs=1m 2>/dev/null
     END=$(date +%s.%N)
     RULE30_TIME=$(echo "$END - $START" | bc)
     RULE30_TIMES[$i]=$RULE30_TIME
@@ -48,7 +48,7 @@ for i in "${!SIZES_MB[@]}"; do
     URANDOM_TIME=$(echo "$END - $START" | bc)
     URANDOM_TIMES[$i]=$URANDOM_TIME
 
-    echo "  Rule30:       ${RULE30_TIME}s"
+    echo "  R30R2:       ${RULE30_TIME}s"
     echo "  /dev/urandom: ${URANDOM_TIME}s"
     echo ""
 done
@@ -59,7 +59,7 @@ echo "════════════════════════�
 echo ""
 
 # Table header
-printf "%-10s │ %15s │ %15s │ %10s\n" "Size" "Rule30" "/dev/urandom" "Speedup"
+printf "%-10s │ %15s │ %15s │ %10s\n" "Size" "R30R2" "/dev/urandom" "Speedup"
 printf "───────────┼─────────────────┼─────────────────┼───────────\n"
 
 # Table rows
@@ -86,10 +86,10 @@ echo "════════════════════════�
 echo ""
 echo "Notes:"
 echo "  • Both sources pipe to dd for fair comparison (bs=1m)"
-echo "  • Rule30: Fixed-size mode (--bytes=N) | dd"
+echo "  • R30R2: Fixed-size mode (--bytes=N) | dd"
 echo "  • /dev/urandom: Kernel CSPRNG with dd reader"
-echo "  • Speedup > 1.0 means Rule30 is faster"
+echo "  • Speedup > 1.0 means R30R2 is faster"
 echo ""
 echo "Command format:"
-echo "  rule30 --bytes=\$((SIZE * 1024 * 1024)) | dd of=file.data bs=1m"
+echo "  r30r2 --bytes=\$((SIZE * 1024 * 1024)) | dd of=file.data bs=1m"
 echo ""

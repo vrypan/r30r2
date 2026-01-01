@@ -3,7 +3,7 @@ package rand
 import "math"
 
 // This file contains math/rand compatibility methods that build on top of
-// the core Uint64() and Read() methods defined in rule30.go.
+// the core Uint64() and Read() methods defined in r30r2.go.
 
 // Uint32 returns a random uint32
 func (r *RNG) Uint32() uint32 {

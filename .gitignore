@@ -1,6 +1,6 @@
 # Binaries
-rule30
-rule30-compare
+r30r2
+r30r2-compare
 stdlib-rng
 test-interface
 compare-read

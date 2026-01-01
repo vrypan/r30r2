@@ -10,10 +10,10 @@ import (
 )
 
 // ====================
-// Rule30RNG Benchmarks
+// R30R2 RNG Benchmarks
 // ====================
 
-func BenchmarkRule30_Read32KB(b *testing.B) {
+func BenchmarkR30R2_Read32KB(b *testing.B) {
 	rng := New(12345)
 	buf := make([]byte, 32<<10)
 	b.ResetTimer()
@@ -24,7 +24,7 @@ func BenchmarkRule30_Read32KB(b *testing.B) {
 	}
 }
 
-func BenchmarkRule30_Read1KB(b *testing.B) {
+func BenchmarkR30R2_Read1KB(b *testing.B) {
 	rng := New(67890)
 	buf := make([]byte, 1<<10)
 	b.ResetTimer()
@@ -35,7 +35,7 @@ func BenchmarkRule30_Read1KB(b *testing.B) {
 	}
 }
 
-func BenchmarkRule30_Uint64(b *testing.B) {
+func BenchmarkR30R2_Uint64(b *testing.B) {
 	rng := New(42)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

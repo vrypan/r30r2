@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/vrypan/rule30rnd/rand"
+	"github.com/vrypan/r30r2/rand"
 )
 
 // mathRandReader wraps math/rand to implement io.Reader
@@ -115,7 +115,7 @@ func main() {
 
 	// Store results by RNG type and size
 	results := make(map[string]map[int]BenchResult)
-	results["Rule30RNG"] = make(map[int]BenchResult)
+	results["R30R2RNG"] = make(map[int]BenchResult)
 	results["math/rand"] = make(map[int]BenchResult)
 	results["math/rand/v2"] = make(map[int]BenchResult)
 	results["crypto/rand"] = make(map[int]BenchResult)
@@ -127,11 +127,11 @@ func main() {
 
 		fmt.Printf("Testing with %s buffers (%d iterations)...\n", sizeStr, iters)
 
-		// Rule30RNG
+		// R30R2RNG
 		rule30rng := rand.New(12345)
-		result := runBenchmark("Rule30RNG", rule30rng, size, iters)
-		results["Rule30RNG"][size] = result
-		fmt.Printf("  ✓ Rule30RNG:   %7.2f MB/s\n", result.throughput)
+		result := runBenchmark("R30R2RNG", rule30rng, size, iters)
+		results["R30R2RNG"][size] = result
+		fmt.Printf("  ✓ R30R2RNG:   %7.2f MB/s\n", result.throughput)
 
 		// math/rand
 		mathRng := newMathRandReader(12345)
@@ -174,7 +174,7 @@ func main() {
 	fmt.Println()
 
 	// Table rows
-	rngNames := []string{"Rule30RNG", "math/rand", "math/rand/v2", "crypto/rand"}
+	rngNames := []string{"R30R2RNG", "math/rand", "math/rand/v2", "crypto/rand"}
 	for _, rngName := range rngNames {
 		fmt.Printf("%-15s", rngName)
 
@@ -191,7 +191,7 @@ func main() {
 
 	// Additional info
 	fmt.Println("Notes:")
-	fmt.Println("  • Rule30RNG:    1D CA (Rule 30), 256-bit state, deterministic")
+	fmt.Println("  • R30R2RNG:    1D CA (Rule 30), 256-bit state, deterministic")
 	fmt.Println("  • math/rand:    Legacy PRNG (LFSR), deterministic")
 	fmt.Println("  • math/rand/v2: Modern PRNG (PCG), deterministic")
 	fmt.Println("  • crypto/rand:  Hardware-accelerated CSPRNG")
