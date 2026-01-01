@@ -29,8 +29,9 @@ func New(seed uint64) *RNG {
 	return rng
 }
 
-// step applies Rule 30 to all 256 bits in parallel (64-bit word-wise)
-// Rule 30: new_bit = left XOR (center OR right)
+// step applies radius-2 CA with non-linear Rule 30 variant to all 256 bits in parallel
+// Radius-2 rule: new_bit = (left2 XOR left1) XOR ((center OR right1) OR right2)
+// Non-linear extension of Rule 30 for better randomness
 // Optimized for 64-bit architecture: processes 64 bits at once, fully unrolled
 func (r *RNG) step() {
 	// Fully unrolled loop for maximum performance
@@ -40,31 +41,45 @@ func (r *RNG) step() {
 	s2 := r.state[2]
 	s3 := r.state[3]
 
-	// Word 0: left neighbor from word 3, right neighbor from word 1
-	left0 := (s0 >> 1) | (s3 << 63)
-	right0 := (s0 << 1) | (s1 >> 63)
-	new0 := left0 ^ (s0 | right0)
+	// Word 0: radius-2 neighborhood wraps from word 3 to word 1
+	left2_0 := (s0 >> 2) | (s3 << 62)
+	left1_0 := (s0 >> 1) | (s3 << 63)
+	center0 := s0
+	right1_0 := (s0 << 1) | (s1 >> 63)
+	right2_0 := (s0 << 2) | (s1 >> 62)
+	new0 := (left2_0 ^ left1_0) ^ ((center0 | right1_0) | right2_0)
 
-	// Word 1: left neighbor from word 0, right neighbor from word 2
-	left1 := (s1 >> 1) | (s0 << 63)
-	right1 := (s1 << 1) | (s2 >> 63)
-	new1 := left1 ^ (s1 | right1)
+	// Word 1: radius-2 neighborhood wraps from word 0 to word 2
+	left2_1 := (s1 >> 2) | (s0 << 62)
+	left1_1 := (s1 >> 1) | (s0 << 63)
+	center1 := s1
+	right1_1 := (s1 << 1) | (s2 >> 63)
+	right2_1 := (s1 << 2) | (s2 >> 62)
+	new1 := (left2_1 ^ left1_1) ^ ((center1 | right1_1) | right2_1)
 
-	// Word 2: left neighbor from word 1, right neighbor from word 3
-	left2 := (s2 >> 1) | (s1 << 63)
-	right2 := (s2 << 1) | (s3 >> 63)
-	new2 := left2 ^ (s2 | right2)
+	// Word 2: radius-2 neighborhood wraps from word 1 to word 3
+	left2_2 := (s2 >> 2) | (s1 << 62)
+	left1_2 := (s2 >> 1) | (s1 << 63)
+	center2 := s2
+	right1_2 := (s2 << 1) | (s3 >> 63)
+	right2_2 := (s2 << 2) | (s3 >> 62)
+	new2 := (left2_2 ^ left1_2) ^ ((center2 | right1_2) | right2_2)
 
-	// Word 3: left neighbor from word 2, right neighbor from word 0 (circular)
-	left3 := (s3 >> 1) | (s2 << 63)
-	right3 := (s3 << 1) | (s0 >> 63)
-	new3 := left3 ^ (s3 | right3)
+	// Word 3: radius-2 neighborhood wraps from word 2 to word 0 (circular)
+	left2_3 := (s3 >> 2) | (s2 << 62)
+	left1_3 := (s3 >> 1) | (s2 << 63)
+	center3 := s3
+	right1_3 := (s3 << 1) | (s0 >> 63)
+	right2_3 := (s3 << 2) | (s0 >> 62)
+	new3 := (left2_3 ^ left1_3) ^ ((center3 | right1_3) | right2_3)
 
-	// Update state with XOR rotation mixing (use primes for good diffusion)
-	r.state[0] = new0 ^ bits.RotateLeft64(s0, 13)
-	r.state[1] = new1 ^ bits.RotateLeft64(s1, 17)
-	r.state[2] = new2 ^ bits.RotateLeft64(s2, 23)
-	r.state[3] = new3 ^ bits.RotateLeft64(s3, 29)
+	// Multi-rotation XOR mixing for better diffusion
+	// Multiple rotations at different amounts, inspired by ChaCha/Salsa
+	// Provides excellent statistical quality with minimal performance cost
+	r.state[0] = new0 ^ bits.RotateLeft64(new0, 13) ^ bits.RotateLeft64(new0, 17) ^ bits.RotateLeft64(new0, 23)
+	r.state[1] = new1 ^ bits.RotateLeft64(new1, 13) ^ bits.RotateLeft64(new1, 17) ^ bits.RotateLeft64(new1, 23)
+	r.state[2] = new2 ^ bits.RotateLeft64(new2, 13) ^ bits.RotateLeft64(new2, 17) ^ bits.RotateLeft64(new2, 23)
+	r.state[3] = new3 ^ bits.RotateLeft64(new3, 13) ^ bits.RotateLeft64(new3, 17) ^ bits.RotateLeft64(new3, 23)
 }
 
 // Uint64 returns a random uint64
