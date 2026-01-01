@@ -93,11 +93,11 @@ Benchmarks on Apple M4, verified 2026-01-01 (run `make bench` to reproduce):
 
 BigCrush results comparing Rule 30 with Go's stdlib RNGs (verified 2026-01-01):
 
-| Generator | BigCrush Score | Failures | Performance vs math/rand |
-|-----------|---------------|----------|--------------------------|
-| **Rule 30** | **160/160** ✓ | **0** |  **3.86× faster** |
-| **math/rand/v2** | **160/160** ✓ | 0 | 1.59× faster |
-| **math/rand** | 159/160 | 1* | 1.00× (baseline) |
+| Generator | BigCrush Score | Performance vs math/rand |
+|-----------|---------------|--------------------------|
+| **math/rand** | 159/160* | 1.00× (baseline) |
+| **math/rand/v2** | **160/160** ✓ | 0.56× |
+| **Rule 30** | **160/160** ✓ | **1.03×** |
 
 *math/rand fails test #37 (Gap, r = 20) with p-value 5.6e-16
 
