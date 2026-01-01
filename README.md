@@ -63,19 +63,19 @@ Benchmarks on Apple M4 (run `make bench` to reproduce):
 
 |Algorithm       |     Read32KB |      Read1KB |       Uint64|
 |----------------|--------------|--------------|-------------|
-|MathRand        |  22974.00 ns |    693.40 ns |      1.84 ns|
-|MathRandV2      |  14256.00 ns |    432.20 ns |      3.36 ns|
-|**Rule30**      |   **8076.00 ns** |    **257.50 ns** |      **1.80 ns**|
-|CryptoRand      |   7480.00 ns |    371.40 ns |     55.76 ns|
+|MathRand        |  21238.00 ns |    667.90 ns |      1.85 ns|
+|MathRandV2      |  13042.00 ns |    427.00 ns |      3.29 ns|
+|**Rule30**      |   **7592.00 ns** |    **242.30 ns** |      **1.67 ns**|
+|CryptoRand      |   7019.00 ns |    368.70 ns |     56.10 ns|
 
 **Relative to math/rand:**
 
 |Algorithm       |    Read32KB |     Read1KB |      Uint64|
 |----------------|-------------|-------------|------------|
 |MathRand        |       1.00x |       1.00x |       1.00x|
-|MathRandV2      |       1.61x |       1.60x |       0.55x|
-|**Rule30**      |       **2.84x** |       **2.69x** |       **1.02x**|
-|CryptoRand      |       3.07x |       1.87x |       0.03x|
+|MathRandV2      |       1.63x |       1.56x |       0.56x|
+|**Rule30**      |       **2.80x** |       **2.76x** |       **1.11x**|
+|CryptoRand      |       3.03x |       1.81x |       0.03x|
 
 ### vs /dev/urandom
 
@@ -123,8 +123,9 @@ Evolution rule: new_bit = (left2 XOR left1) XOR ((center OR right1) OR right2)
 - Radius-2 neighborhood: each bit depends on 5 neighboring cells
 - Processes 64 bits in parallel per word (bitwise operations)
 - Fully unrolled loop - all 4 words updated simultaneously
-- Multi-rotation XOR mixing (angles 13, 17, 23) for exceptional diffusion
-- Each iteration generates 256 bits
+- Pure CA evolution stored in state
+- Multi-rotation XOR mixing (angles 13, 17, 23) applied at output time for exceptional diffusion
+- Each iteration generates 256 bits (4 × 64-bit words)
 
 **Why it's fast**:
 - Bit-level parallelism (64 bits per operation vs 1 bit serially)

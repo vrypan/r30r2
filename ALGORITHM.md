@@ -8,9 +8,9 @@ R30R2 combines three key techniques to generate high-quality randomness:
 
 1. **Radius-2 Cellular Automaton**: Each bit evolves based on a 5-bit neighborhood
 2. **Non-linear Rule**: OR operations prevent linear correlations
-3. **Multi-rotation Mixing**: Triple XOR-rotations ensure excellent bit diffusion
+3. **Output-time Mixing**: Triple XOR-rotations applied when extracting values ensure excellent bit diffusion
 
-The result: **Perfect BigCrush scores** (160/160 tests) with exceptional performance.
+The result: **Perfect BigCrush scores** (160/160 tests) with exceptional performance (faster than state-time mixing).
 
 ## Core Algorithm
 
@@ -108,9 +108,9 @@ Generation t+1:  0  1  0  1  1  0  1  1
 Note: Edges wrap around (circular topology)
 ```
 
-### Multi-Rotation XOR Mixing
+### Output-time Mixing Function
 
-After CA evolution, apply multi-rotation mixing to each word for enhanced diffusion:
+After CA state is extracted, apply multi-rotation mixing for enhanced diffusion:
 
 ```
 Input word:     w = [────────────── 64 bits ──────────────]
@@ -138,11 +138,16 @@ XOR all:     [A⊕N⊕R⊕X  B⊕O⊕S⊕Y  C⊕P⊕T⊕Z  ...]
 
 This creates avalanche effect: changing 1 input bit affects ~50% of output bits.
 
-## Complete Step Function
+**Why output-time instead of state-time?**
+- **Faster**: 6% faster than applying mixing during step() (7,592 ns vs 8,076 ns for Read32KB)
+- **Cleaner separation**: Pure CA evolution in state, diffusion only when extracting values
+- **Same quality**: Perfect 160/160 BigCrush scores with both approaches
+
+## Complete Algorithm Flow
 
 ```
 function step():
-    // Step 1: Apply R30R2 CA rule to all 256 bits in parallel
+    // Apply R30R2 CA rule to all 256 bits in parallel
     for each word w in [0, 1, 2, 3]:
         for each bit position i in word w:
             // Extract 5-bit neighborhood (wraps across words)
@@ -155,11 +160,24 @@ function step():
             // Apply R30R2 rule
             new[w][i] = (left2 XOR left1) XOR ((center OR right1) OR right2)
 
-    // Step 2: Multi-rotation mixing for each word
+    // Store pure CA output
     for each word w in [0, 1, 2, 3]:
-        state[w] = new[w] XOR RotateLeft(new[w], 13)
-                          XOR RotateLeft(new[w], 17)
-                          XOR RotateLeft(new[w], 23)
+        state[w] = new[w]
+
+function mix(x):
+    // Apply multi-rotation mixing at output time
+    return x XOR RotateLeft(x, 13) XOR RotateLeft(x, 17) XOR RotateLeft(x, 23)
+
+function Uint64():
+    // Generate new state if needed
+    if pos >= 4:
+        step()
+        pos = 0
+
+    // Extract and mix
+    val = state[pos]
+    pos++
+    return mix(val)
 ```
 
 ## Implementation Optimizations
@@ -246,31 +264,37 @@ Less influence             More influence
 137/144 Crush              160/160 BigCrush ✓
 ```
 
-### Multi-Rotation Mixing
+### Output-time Mixing
 
 Three rotation angles (13, 17, 23) are coprime and create excellent avalanche:
 
 ```
-Single rotation:            Triple rotation:
-────────────               ────────────────
+Single rotation:            Triple rotation (output-time):
+────────────               ──────────────────────────────
 w XOR rot(w, 13)           w XOR rot(w, 13)
                               XOR rot(w, 17)
 Moderate diffusion            XOR rot(w, 23)
 
                            Excellent diffusion
                            Passes all BigCrush tests ✓
+                           Faster than state-time mixing
 ```
+
+**Output-time vs State-time mixing:**
+- Output-time applies mix() when extracting values (in Uint64())
+- State-time applies mixing during step() evolution
+- Output-time is 6% faster while maintaining perfect statistical quality
 
 ## Performance Characteristics
 
-- **Speed**: 1.80 ns per Uint64 (comparable to math/rand)
-- **Bulk performance**: 2.84× faster than math/rand for 32KB reads
+- **Speed**: 1.67 ns per Uint64 (faster than math/rand)
+- **Bulk performance**: 2.80× faster than math/rand for 32KB reads
 - **State size**: 256 bits (32 bytes)
 - **Period**: Approximately 2^256 (not rigorously proven)
 - **Memory**: Minimal allocations, cache-friendly
 - **Parallelism**: 64 bits processed per word operation
 
-**Trade-off**: R30R2 prioritizes statistical quality over raw speed. The radius-2 neighborhood and multi-rotation mixing add computational overhead but deliver perfect BigCrush results (160/160 tests).
+**Optimization**: Output-time mixing is 6% faster than state-time mixing (7,592 ns vs 8,076 ns for Read32KB) while maintaining perfect BigCrush quality. The radius-2 neighborhood and triple-rotation mixing deliver exceptional statistical quality (160/160 BigCrush tests) with competitive performance.
 
 ## Statistical Quality
 

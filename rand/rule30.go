@@ -73,17 +73,22 @@ func (r *RNG) step() {
 	right2_3 := (s3 << 2) | (s0 >> 62)
 	new3 := (left2_3 ^ left1_3) ^ ((center3 | right1_3) | right2_3)
 
-	// Multi-rotation XOR mixing for better diffusion
-	// Multiple rotations at different amounts, inspired by ChaCha/Salsa
-	// Provides excellent statistical quality with minimal performance cost
-	r.state[0] = new0 ^ bits.RotateLeft64(new0, 13) ^ bits.RotateLeft64(new0, 17) ^ bits.RotateLeft64(new0, 23)
-	r.state[1] = new1 ^ bits.RotateLeft64(new1, 13) ^ bits.RotateLeft64(new1, 17) ^ bits.RotateLeft64(new1, 23)
-	r.state[2] = new2 ^ bits.RotateLeft64(new2, 13) ^ bits.RotateLeft64(new2, 17) ^ bits.RotateLeft64(new2, 23)
-	r.state[3] = new3 ^ bits.RotateLeft64(new3, 13) ^ bits.RotateLeft64(new3, 17) ^ bits.RotateLeft64(new3, 23)
+	// Store pure CA output without mixing
+	// Mixing is applied at output time in mix() function
+	r.state[0] = new0
+	r.state[1] = new1
+	r.state[2] = new2
+	r.state[3] = new3
+}
+
+// mix applies a diffusion function to improve output quality
+// Uses multi-rotation XOR mixing for fast, high-quality diffusion
+func mix(x uint64) uint64 {
+	return x ^ bits.RotateLeft64(x, 13) ^ bits.RotateLeft64(x, 17) ^ bits.RotateLeft64(x, 23)
 }
 
 // Uint64 returns a random uint64
-// Optimized to extract directly from state without byte conversion
+// Applies diffusion function to CA output for better statistical quality
 func (r *RNG) Uint64() uint64 {
 	// Generate new state if we've exhausted all 4 uint64 values
 	if r.pos >= 4 {
@@ -91,10 +96,10 @@ func (r *RNG) Uint64() uint64 {
 		r.pos = 0
 	}
 
-	// Extract uint64 directly from state
+	// Extract uint64 from state and apply mixing function
 	val := r.state[r.pos]
 	r.pos++
-	return val
+	return mix(val)
 }
 
 // Read implements io.Reader interface
