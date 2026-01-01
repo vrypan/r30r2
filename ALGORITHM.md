@@ -57,7 +57,7 @@ After:      ?  ?  ?  X  ?  ?  ?
 The R30R2 rule computes the new bit value from the 5-bit neighborhood:
 
 ```
-new_bit = (left2 XOR left1) XOR ((center OR right1) OR right2)
+new_bit = (left2 XOR left1) XOR (center OR right1 OR right2)
 ```
 
 **Step-by-step breakdown:**
@@ -67,13 +67,10 @@ Step 1: Compute left XOR component
         left_xor = left2 XOR left1
 
 Step 2: Compute right OR component
-        right_or = center OR right1
+        right_or = center OR right1 OR right2
 
-Step 3: Extend with right2
-        extended = right_or OR right2
-
-Step 4: Final XOR
-        new_bit = left_xor XOR extended
+Step 3: Final XOR
+        new_bit = left_xor XOR right_or
 ```
 
 ### Visual Example: Single Bit Evolution
@@ -88,13 +85,12 @@ Input neighborhood:  1  0  1  1  0  1  0
                      └───────────── left2  = 0
 
 Calculation:
-  Step 1: left_xor = left2 XOR left1              = 0 XOR 1 = 1
-  Step 2: right_or = center OR right1             = 1 OR 0  = 1
-  Step 3: extended = right_or OR right2           = 1 OR 1  = 1
-  Step 4: new_bit  = left_xor XOR extended        = 1 XOR 1 = 0
+  Step 1: left_xor = left2 XOR left1              = 0 XOR 1     = 1
+  Step 2: right_or = center OR right1 OR right2   = 1 OR 0 OR 1 = 1
+  Step 3: new_bit  = left_xor XOR right_or        = 1 XOR 1     = 0
 
-Output:                  ?  ?  ?  0  ?  ?  ?
-                                 ↑
+Output:               ?  ?  ?  0  ?  ?  ?
+                               ↑
                             new bit = 0
 ```
 
