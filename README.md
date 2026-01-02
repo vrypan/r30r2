@@ -28,9 +28,6 @@ go get github.com/vrypan/r30r2
 # Unlimited streaming (use with head, pv, or Ctrl+C)
 ./r30r2 --bytes=0 | head -c 1073741824 > test.data
 
-# Benchmark throughput
-./r30r2 --benchmark
-
 # Reproducible output with seed
 ./r30r2 --seed=12345 --bytes=1024 > random.bin
 ```
