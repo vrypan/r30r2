@@ -28,7 +28,7 @@ mathrandv2-gen: mathrandv2-gen.go
 	go build -o mathrandv2-gen mathrandv2-gen.go
 
 # Run SmallCrush (quick test)
-smallcrush: test-smallcrush ../r30r2
+smallcrush: test-smallcrush ../ring30mix
 	@echo "Running SmallCrush test (approx 1-2 minutes)..."
 	@echo "Generating unlimited random data and piping to TestU01..."
 	@LOGBASE=smallcrush; \
@@ -42,10 +42,10 @@ smallcrush: test-smallcrush ../r30r2
 		LOGFILE=$$LOGBASE-$$N.log; \
 	fi; \
 	echo "Output will be saved to $$LOGFILE"; \
-	../r30r2 --bytes=0 2>/dev/null | ./testu01/test-smallcrush | tee $$LOGFILE
+	../ring30mix --bytes=0 2>/dev/null | ./test-smallcrush | tee $$LOGFILE
 
 # Run Crush (medium test)
-crush: test-crush ../r30r2
+crush: test-crush ../ring30mix
 	@echo "Running Crush test (approx 1 hour)..."
 	@echo "Generating unlimited random data and piping to TestU01..."
 	@LOGBASE=crush; \
@@ -59,10 +59,10 @@ crush: test-crush ../r30r2
 		LOGFILE=$$LOGBASE-$$N.log; \
 	fi; \
 	echo "Output will be saved to $$LOGFILE"; \
-	../r30r2 --bytes=0 2>/dev/null | ./testu01/test-crush | tee $$LOGFILE
+	../ring30mix --bytes=0 2>/dev/null | ./test-crush | tee $$LOGFILE
 
 # Run BigCrush (comprehensive test)
-bigcrush: test-bigcrush ../r30r2
+bigcrush: test-bigcrush ../ring30mix
 	@echo "Running BigCrush test (approx 8 hours)..."
 	@echo "Generating unlimited random data and piping to TestU01..."
 	@LOGBASE=bigcrush; \
@@ -76,10 +76,10 @@ bigcrush: test-bigcrush ../r30r2
 		LOGFILE=$$LOGBASE-$$N.log; \
 	fi; \
 	echo "Output will be saved to $$LOGFILE"; \
-	../r30r2 --bytes=0 2>/dev/null | ./testu01/test-bigcrush | tee $$LOGFILE
+	../ring30mix --bytes=0 2>/dev/null | ./test-bigcrush | tee $$LOGFILE
 
-# Build r30r2 binary if needed
-../r30r2:
+# Build ring30mix binary if needed
+../ring30mix:
 	@cd .. && $(MAKE) $(notdir $@)
 
 # Run SmallCrush with math/rand (comparison)
@@ -190,12 +190,12 @@ clean:
 	rm -f *.o
 
 help:
-	@echo "TestU01 Tests for R30R2 RNG and math/rand comparison"
+	@echo "TestU01 Tests for ring30mix RNG and math/rand comparison"
 	@echo ""
-	@echo "R30R2 Targets:"
-	@echo "  smallcrush           Run SmallCrush with R30R2 (1-2 min)"
-	@echo "  crush                Run Crush with R30R2 (1 hour)"
-	@echo "  bigcrush             Run BigCrush with R30R2 (8 hours)"
+	@echo "ring30mix Targets:"
+	@echo "  smallcrush           Run SmallCrush with ring30mix (1-2 min)"
+	@echo "  crush                Run Crush with ring30mix (1 hour)"
+	@echo "  bigcrush             Run BigCrush with ring30mix (8 hours)"
 	@echo ""
 	@echo "math/rand Comparison Targets:"
 	@echo "  mathrand-smallcrush  Run SmallCrush with math/rand (1-2 min)"
@@ -212,6 +212,6 @@ help:
 	@echo "  clean                Remove built programs"
 	@echo ""
 	@echo "Example:"
-	@echo "  make smallcrush           # Test R30R2"
+	@echo "  make smallcrush           # Test ring30mix"
 	@echo "  make mathrand-smallcrush  # Test math/rand for comparison"
 	@echo "  make mathrandv2-smallcrush # Test math/rand/v2 for comparison"

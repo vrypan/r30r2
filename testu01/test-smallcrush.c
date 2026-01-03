@@ -1,5 +1,5 @@
 /*
- * TestU01 SmallCrush test for Rule30 RNG
+ * TestU01 SmallCrush test for ring30mix RNG
  * Reads random data from stdin (pipe from Go program)
  */
 
@@ -49,7 +49,7 @@ int main(void) {
     unif01_Gen *gen;
 
     printf("═══════════════════════════════════════════════════════════\n");
-    printf("  TestU01 SmallCrush - Rule30 RNG\n");
+    printf("  TestU01 SmallCrush - ring30mix RNG\n");
     printf("═══════════════════════════════════════════════════════════\n");
     printf("\n");
     printf("Reading random data from stdin...\n");
@@ -57,7 +57,7 @@ int main(void) {
     printf("\n");
 
     /* Create generator */
-    gen = unif01_CreateExternGenBits("Rule30 via stdin", stdin_gen);
+    gen = unif01_CreateExternGenBits("ring30mix via stdin", stdin_gen);
 
     /* Run SmallCrush battery */
     bbattery_SmallCrush(gen);

@@ -4,7 +4,7 @@
 set -e
 
 echo "═══════════════════════════════════════════════════════════"
-echo "  Rule30 RNG - Quick TestU01 Test"
+echo "  ring30mix RNG - Quick TestU01 Test"
 echo "═══════════════════════════════════════════════════════════"
 echo ""
 
@@ -31,11 +31,11 @@ if [ ! -f ./test-smallcrush ]; then
     echo ""
 fi
 
-# Check if rule30 binary exists
-if [ ! -f ../rule30 ]; then
-    echo "Building rule30 binary..."
-    cd .. && make rule30 && cd testu01
-    echo "✓ rule30 binary built"
+# Check if ring30mix binary exists
+if [ ! -f ../ring30mix ]; then
+    echo "Building ring30mix binary..."
+    cd .. && make ring30mix && cd testu01
+    echo "✓ ring30mix binary built"
     echo ""
 fi
 
@@ -43,13 +43,13 @@ fi
 echo "Running SmallCrush test..."
 echo "This will take approximately 1-2 minutes."
 echo ""
-echo "Random data will be piped from Rule30 RNG to TestU01."
+echo "Random data will be piped from ring30mix RNG to TestU01."
 echo "Look for 'All tests were passed' or individual test failures."
 echo ""
 echo "Press Enter to start..."
 read
 
-cd .. && ./rule30 --bytes=524288000 2>&1 | ./testu01/test-smallcrush 2>&1 | grep -v "Error: Failed"
+cd .. && ./ring30mix --bytes=524288000 2>&1 | ./testu01/test-smallcrush 2>&1 | grep -v "Error: Failed"
 
 echo ""
 echo "═══════════════════════════════════════════════════════════"
