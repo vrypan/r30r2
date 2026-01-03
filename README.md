@@ -5,6 +5,8 @@ High-performance pseudo-random number generator based on Rule 30 cellular automa
 - **~2× faster** than Go's math/rand/v2 PCG
 - **Perfect BigCrush score** (160/160) with superior p-value distribution
 
+See [ALGORITHM.md](ALGORITHM.md) for details.
+
 ## Quick Start
 
 ### Installation
@@ -62,7 +64,7 @@ Benchmarks on Apple M4, verified 2026-01-03 (run `make bench` to reproduce):
 ### Absolute Performance
 
 |Algorithm               |  Read() 32KB |   Read() 1KB |     Uint64()|
-|------------------------|--------------|--------------|-------------|
+|------------------------|-------------:|-------------:|------------:|
 |math/rand/v2 PCG        |  13249.00 ns |    413.30 ns |      3.23 ns|
 |math/rand/v2 ChaCha8    |  11478.00 ns |    360.70 ns |      2.77 ns|
 |**ring30mix**           |   **6721.00 ns** |    **214.90 ns** |      **1.62 ns**|
@@ -72,10 +74,10 @@ Benchmarks on Apple M4, verified 2026-01-03 (run `make bench` to reproduce):
 ### Speed vs math/rand/v2 PCG (baseline = 1.00×)
 
 |Algorithm               | Read() 32KB |  Read() 1KB |    Uint64()|
-|------------------------|-------------|-------------|------------|
+|------------------------|------------:|------------:|-----------:|
 |math/rand/v2 PCG        |       1.00x |       1.00x |       1.00x|
 |math/rand/v2 ChaCha8    |       1.15x |       1.15x |       1.16x|
-|**ring30mix**           |    **1.97x** |   **1.92x** |   **1.99x**|
+|**ring30mix**           |    **1.97x** |   **1.92x**|   **1.99x**|
 |math/rand               |       0.62x |       0.60x |       1.79x|
 |crypto/rand             |       1.78x |       1.13x |       0.06x|
 
@@ -84,7 +86,7 @@ Benchmarks on Apple M4, verified 2026-01-03 (run `make bench` to reproduce):
 **Perfect BigCrush score** - verified 2026-01-03:
 
 | Test Suite | Tests | Passed | Status |
-|------------|-------|--------|--------|
+|-----------:|------:|-------:|-------:|
 | SmallCrush | 15 | 15/15 ✅ | 100% |
 | Crush | 144 | 144/144 ✅ | 100% |
 | **BigCrush** | **160** | **160/160 ✅** | **100%** |
